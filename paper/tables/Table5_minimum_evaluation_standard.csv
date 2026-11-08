@@ -1,11 +1,11 @@
-Item,Requirement,How this study met it
+Item,Requirement,How this study addressed it
 1. Duplicate audit,Hash every image; report near-duplicate pairs and how many cross splits.,"226 pairs found, 43 across published splits"
-2. Group-disjoint splits,Keep all copies of a patient/image in one split or fold.,"1,416 groups, five group-disjoint folds"
+2. Group-disjoint splits,Keep all copies of a patient/image in one split or fold.,"1,416 image groups, five group-disjoint folds (partly met: no patient identifiers)"
 3. No selection on reported data,"Fix weights, thresholds and configurations without the reported test data.",Final-epoch weights; thresholds from calibration groups only
 4. Pooled or multi-site estimates with intervals,Report pooled out-of-fold or multi-site AP with a resampling CI.,"Pooled AP over 1,628 images, 2,000-resample group bootstrap"
 5. Lesion-level recall at stated false-positive rates,Report recall at fixed false positives per image and the maximum attainable recall.,Recall at 0.1/0.25/0.5 FP per image; conformal feasibility
 6. Untouched external set,Score an external set that played no part in any decision.,"180 clinic images, 0 duplicates of the pool"
-7. Strong fine-tuned baselines,"Compare with current fine-tuned CNN and transformer detectors, not only older ones.","YOLOv8m, YOLO11m, RT-DETR-L"
+7. Strong fine-tuned baselines,"Compare with current fine-tuned CNN and transformer detectors, not only older ones.","YOLOv8m, YOLO11m, RT-DETR-L (default hyperparameters, not tuned)"
 8. Paired comparisons,Compare models on the same resamples and report the difference with its interval.,"Paired group bootstrap, P(A>B), folds won, external difference"
-9. Pre-specified rules and ablations,"Fix in advance, ideally in a public registry, what counts as an improvement; ablate every new component.",Four criteria fixed in a dated file before any BiFurca result (not publicly registered); three single-module ablations
-"10. Open splits, predictions and code; report negatives","Release fold assignment, per-image predictions and code; publish failed claims.",All released (Data and Code Availability); negative result reported
+9. Pre-specified rules and ablations,"Fix in advance, ideally in a public registry, what counts as an improvement; ablate every new component.",Four criteria fixed in a dated file before any BiFurca result (partly met: not publicly registered); three single-module ablations
+"10. Open splits, predictions and code; report negatives","Release fold assignment, per-image predictions and code; publish failed claims.",All released (Data and Code Availability); null result reported

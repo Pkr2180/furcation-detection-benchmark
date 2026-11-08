@@ -60,7 +60,7 @@ allowed.add(f"{N[bb]['fur'] - min(N[b]['fur'] for b in ('rtdetr-l', 'yolo11m', '
 allowed.add(f"{N['full']['fur'] / N[bb]['fur']:.0%}".rstrip("%"))
 allowed.add(str(5 * sum(1 for v in RES if not v.endswith("overfit"))))   # model-folds
 CONST = {"14", "12", "13", "0.95", "0.02", "0.1", "0.25", "0.5", "0.3", "0.75", "90", "80", "60", "20", "1,280", "1280", "728", "1,316",
-         "2", "4", "5", "3", "1", "0", "10", "2000", "2,000", "46", "72", "50", "101", "2017", "0.15", "15", "6", "16", "11"}
+         "2", "4", "5", "3", "1", "0", "10", "2000", "2,000", "46", "72", "50", "101", "2017", "2024", "0.15", "0.999", "15", "6", "16", "11"}
 allowed |= CONST
 
 for name in ("Furcation_Benchmark_Manuscript.docx", "Furcation_Benchmark_Supplementary.docx"):
@@ -93,7 +93,7 @@ for v, r in RES.items():
     ok(f"{b['fur_ap50']:.3f}" in text or v.startswith("no_"), f"{v} FUR AP50 {b['fur_ap50']:.3f} not in manuscript")
     ok(abs(N[v]["fur"] - b["fur_ap50"]) < 1e-12, f"{v} numbers.json differs from res_final.json")
 ok(N["best_benchmark"] == max(["rtdetr-l", "yolo11m", "yolov8m"], key=lambda v: RES[v]["by_seed"]["0"]["fur_ap50"]), "best benchmark wrong")
-ok("withdrawn" in text, "pre-registered withdrawal not stated")
+ok("no new-architecture claim is made" in text, "pre-specified no-claim outcome not stated")
 
 print(f"{checks} checks, {len(fails)} failures")
 for f in fails:

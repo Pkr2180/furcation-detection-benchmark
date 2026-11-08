@@ -23,7 +23,8 @@ ABL = [v for v in ("no_mirror", "no_coords", "no_context") if v in N]
 bb = N["best_benchmark"]; P = N["paired"]
 f3 = lambda x: f"{x:.3f}"
 ci = lambda v: f"{f3(N[v]['fur'])} (95% CI {f3(N[v]['lo'])}–{f3(N[v]['hi'])})"
-dci = lambda d: f"{d['point']:+.3f} (95% CI {d['ci'][0]:+.3f} to {d['ci'][1]:+.3f}; P(A>B) = {d['p_a_gt_b']:.2f})"
+_pfmt = lambda p: "P(A>B) < 0.001" if p == 0 else "P(A>B) > 0.999" if p == 1 else f"P(A>B) = {p:.2f}"
+dci = lambda d: f"{d['point']:+.3f} (95% CI {d['ci'][0]:+.3f} to {d['ci'][1]:+.3f}; {_pfmt(d['p_a_gt_b'])})"
 pfp = P["full__vs__plain"]; pfb = P[f"full__vs__{bb}"]; ppb = P[f"plain__vs__{bb}"]
 others = [b for b in BENCH if b != bb]
 ext_best = max([v for v in NAME if v in N], key=lambda v: N[v]["ext"])
@@ -52,7 +53,7 @@ for a in ABL:
     if d is None:
         continue
     abl_sent.append(f"removing {COMPONENT[a]} changed furcation AP@50 by {-d['point']:+.3f} "
-                    f"(full minus ablated {d['point']:+.3f}, 95% CI {d['ci'][0]:+.3f} to {d['ci'][1]:+.3f})")
+                    f"(95% CI {-d['ci'][1]:+.3f} to {-d['ci'][0]:+.3f})")
     if d["ci"][0] > 0 or d["ci"][1] < 0:
         abl_null = False
 if ABL and len(abl_sent) == len(ABL):
@@ -129,15 +130,15 @@ def figure(name, legend, d=None, width=6.3):
 
 
 # ================================================================== TITLE PAGE
-TITLE = ("Automated furcation detection on panoramic radiographs is not yet solved: a position paper on leakage-safe "
-         "evaluation, supported by a pre-specified benchmark")
+TITLE = ("Automated furcation detection on panoramic radiographs is not yet solved: a position paper on evaluation "
+         "standards, supported by a pre-specified, leakage-safe benchmark")
 MS = QN["map_stats"]
 _r = MS["pearson_full_plain_median"]
 CORR_WORD = "strongly" if _r >= 0.7 else "moderately" if _r >= 0.4 else "weakly"
 _m = max(MS["mass_in_box_full_median"], MS["mass_in_box_plain_median"])
 ENRICH = MS["mass_in_box_full_median"] / MS["box_area_share_median"]
-MASS_SENT = ((f", about {ENRICH:.0f} times what a uniform map would give, so the maps did respond to the lesions, but "
-              f"most of the score lay on neighbouring teeth rather than on the inter-radicular area")
+MASS_SENT = ((f", about {ENRICH:.0f} times what a uniform map would give; the maps therefore responded to the lesions, "
+              f"but most of the score lay outside the annotated boxes")
              if _m < 0.5 else "; most of the score mass fell on the annotated lesions")
 LEAK_DELTA = N[bb]["fur"] - N["sens"][bb]["fur_ap50_excluding_dup_images"]["ap"]
 REPO = "https://github.com/Pkr2180/furcation-detection-benchmark"
@@ -149,11 +150,11 @@ para("Corresponding author: Pradeepkumar.sdc@saveetha.com", align="c")
 
 # ================================================================== ABSTRACT
 head("Abstract")
-para("Deep-learning detectors for furcation involvement on panoramic radiographs are reported with promising "
-     "accuracy, usually from one small validation split. We argue that such figures can overstate what the technology "
-     "can do, that evaluation currently limits what can be claimed at least as much as architecture does, and that the "
-     "field needs a minimum evaluation standard before new architectures are claimed. We support this position with a pre-specified, leakage-safe "
-     "benchmark of current detectors and of a new anatomy-informed foundation-model detector.", "Position:")
+para("Deep-learning detectors for furcation involvement on panoramic radiographs are often reported from one small "
+     "validation split. We argue that such figures can overstate performance, that evaluation choices move reported "
+     "accuracy as much as architecture choices do, and that the field needs a minimum evaluation standard for claims "
+     "of new or better detectors. We support this position with a pre-specified, leakage-safe benchmark of current "
+     "detectors and of an anatomy-informed foundation-model detector.", "Position:")
 para(f"The public YOLO-Dental dataset (14 radiographic findings) was audited with perceptual hashing, which found "
      f"{N['near_dup_pairs']} near-duplicate image pairs, {N['cross_split_dups']} of them across the published splits. "
      f"The {N['n_pool']:,} development images ({N['n_fur_pool']} furcation boxes) were grouped by duplicate cluster into "
@@ -165,23 +166,24 @@ para(f"The public YOLO-Dental dataset (14 radiographic findings) was audited wit
 para(f"{NAME[bb]} had the highest furcation AP@50, {ci(bb)}, followed by "
      + " and ".join(f"{NAME[b]} {ci(b)}" for b in others) +
      f". BiFurca-DINO reached {ci('full')} and the plain DINOv2 detector {ci('plain')}; the paired difference was "
-     f"{dci(pfp)}. All four pre-specified criteria for a new-model claim failed"
+     f"{dci(pfp)}. BiFurca-DINO met none of the four pre-specified criteria for a new-model claim"
      + ("; in single-module ablations every 95% CI included zero" if abl_null else "") +
-     f". Per-fold furcation AP@50 ranged from "
-     f"{f3(spread[bb][0])} to {f3(spread[bb][1])} for the best model. Pooled lesion recall (IoU ≥ 0.5) never exceeded "
-     f"{f3(maxrec)} for any model, and a conformal threshold for 80% recall was feasible in {feas80} of "
-     f"{5 * len(BENCH + DINO)} model-folds. In an earlier, unpublished single-split analysis of this dataset by the "
-     f"author, the best of six checkpoints scored {f3(N['old_selected'])} on {N['fur_valid_orig']} validation boxes, "
-     f"whereas the final epoch scored {f3(N['old_final'])}.", "Evidence (results):")
+     f". Per-fold furcation AP@50 of the best model ranged from {f3(spread[bb][0])} to {f3(spread[bb][1])}. With at "
+     f"most 100 detections per image, pooled lesion recall (IoU ≥ 0.5) did not exceed {f3(maxrec)} for any model, and "
+     f"a conformal threshold for 80% recall (IoU ≥ 0.3) was feasible in {feas80} of {5 * len(BENCH + DINO)} "
+     f"model-folds. In an earlier single-split analysis of this dataset by the author, the best of six checkpoints "
+     f"scored {f3(N['old_selected'])} on {N['fur_valid_orig']} validation boxes and the final epoch "
+     f"{f3(N['old_final'])}.", "Evidence (results):")
 para("We propose a ten-item minimum evaluation standard: duplicate audit and group-disjoint splits; no model "
      "selection on the reported data; pooled out-of-fold or multi-site estimates with interval estimates; lesion-level "
      "recall at stated false-positive rates; an untouched external set; strong fine-tuned baselines; paired "
      "comparisons; pre-specified (ideally registered) decision rules with ablations; reporting of negative results; and release of "
-     "splits, predictions and code. New architectures should be judged only against this standard.",
+     "splits, predictions and code. Claims of new or better detectors should be judged against this standard.",
      "Recommendations:")
-para("Current panoramic furcation detectors miss too many lesions to rule out furcation involvement; clinical probing "
-     "remains necessary, and published accuracy figures should be read with the evaluation protocol in mind.",
-     "Clinical significance:")
+assert max(N[v]["r025"] for v in BENCH + DINO) < 0.5   # "fewer than half" below is decided by the numbers
+para("The detectors tested here found fewer than half of furcation lesions at 0.25 false positives per image and cannot "
+     "rule out furcation involvement; clinical probing remains necessary, and published accuracy figures should be "
+     "read with the evaluation protocol in mind.", "Clinical significance:")
 para("furcation defects; panoramic radiography; deep learning; object detection; data leakage; evaluation standards; "
      "position paper; foundation models; periodontitis", "Keywords:")
 
@@ -200,14 +202,14 @@ para("Deep learning is now widely applied to dental radiographs for caries, peri
      "radiograph.^{17–20} Detection studies are few: a YOLOv8 study on periapical radiographs reported a furcation AP@50 "
      "of 0.577,^{21} a computer-aided detection system has been proposed,^{22} and a paediatric panoramic study of "
      "primary molars reported a mAP@50 of 0.434 across five lesion classes;^{23} one study used segmentation.^{24} A "
-     "recent letter argued that vision transformers and foundation models remain largely untested in periodontal "
-     "imaging.^{25}")
+     "recent letter called for periodontal imaging research to move beyond two-dimensional, convolutional "
+     "approaches.^{25}")
 para("Two problems limit this evidence. First, medical-imaging datasets often contain near-duplicate images; if copies "
      "fall on both sides of a train-test split, accuracy is overstated.^{26,27} Second, when the best checkpoint or "
      "configuration is chosen on the same small validation set that is reported, the estimate is biased upwards. A "
      "rare finding such as furcation lesions makes both problems worse because a handful of boxes decides the score. An "
-     f"earlier, unpublished single-split analysis of the same public dataset by the author (a FastViT-SA24 backbone with "
-     f"an FCOS head) illustrates the second problem. Its furcation AP@50 of {f3(N['old_selected'])} was the best of six "
+     f"earlier single-split analysis of the same public dataset by the author (a FastViT-SA24 backbone with an FCOS "
+     f"head, not published) illustrates the second problem. Its furcation AP@50 of {f3(N['old_selected'])} was the best of six "
      f"checkpoints evaluated on {N['fur_valid_orig']} validation boxes; the checkpoints ranged from "
      f"{f3(N['old_min'])} to {f3(N['old_selected'])} and the final epoch scored {f3(N['old_final'])} "
      f"(Figure 1A; Supplementary Table S1).")
@@ -216,16 +218,15 @@ para("Self-supervised foundation models such as DINOv2 produce general-purpose i
      "and a panoramic radiograph is roughly mirror-symmetric, so the contralateral molar is a natural within-patient "
      "reference. We designed BiFurca-DINO to encode these priors on top of frozen DINOv2 features and fixed in advance "
      "the criteria it had to meet.")
-para("This is a position paper. Our position has three parts. (1) Reported accuracy for radiographic furcation "
-     "detection is vulnerable to evaluation choices (model selection on small validation sets, split-to-split variance "
-     "and near-duplicate leakage), and in our own earlier analysis the resulting optimism was large. (2) Under "
-     "leakage-safe evaluation the task is far from solved, and an architectural novelty that is not tested against "
-     "strong fine-tuned baselines, with ablations and pre-specified criteria, should not be accepted as progress. (3) The field needs a shared minimum evaluation standard. Sections 2 and 3 give the "
-     "evidence (study design in Figure 2): we audited a public dataset, built a leakage-safe grouped cross-validation with an untouched external "
-     "set, benchmarked current detectors, and tested our own anatomy-informed foundation-model detector against "
-     "criteria fixed in advance. Section 4 explains why single-split figures mislead, Section 5 proposes the "
-     "standard, Section 6 sets out the open problems that define the real frontier, and Section 7 considers "
-     "counter-arguments.")
+para("Our position has three parts. (1) Reported accuracy for radiographic furcation detection is sensitive to "
+     "evaluation choices: model selection on small validation sets, split-to-split variance and near-duplicate "
+     "leakage. (2) Under leakage-safe evaluation the task remains unsolved, and an architectural addition should be "
+     "credited as progress only after it is tested against its own plain backbone and strong fine-tuned baselines, "
+     "with ablations and pre-specified criteria. (3) The field needs a shared minimum evaluation standard. Sections 2 "
+     "and 3 give the evidence (study design in Figure 2): a dataset audit, a leakage-safe grouped cross-validation "
+     "with an untouched external set, a benchmark of current detectors, and a test of an anatomy-informed "
+     "foundation-model detector against criteria fixed in advance. Section 4 interprets the evidence, Section 5 "
+     "proposes the standard, Section 6 sets out open problems, and Section 7 considers counter-arguments.")
 
 # ================================================================== METHODS
 head("2. Evidence: a pre-specified, leakage-safe benchmark")
@@ -239,12 +240,8 @@ para(f"The public YOLO-Dental dataset^{{29}} (CC BY 4.0) contains {N['n_raw_imag
      f"{N['fur_area_median_pct']:.2f}% of the image area; median {QN['gt']['med_w']:.0f} × {QN['gt']['med_h']:.0f} pixels "
      f"at model input, about two DINOv2 patches) and clustered in the posterior mandible and maxilla on both sides "
      f"(Figure 3). Images were resized from their original resolution to 1,316 × 728 pixels and the normalised YOLO "
-     f"labels were converted to pixel boxes and binary furcation masks at that resolution (Figure 4). This chain was "
-     f"checked on the {len(QC['main'])} radiographs of Figure 4: the label files matched the analysed annotations "
-     f"exactly, the rescaled boxes matched the boxes used for evaluation to within "
-     f"{max(QN['gt_prepost_checks']['rescaled_vs_analysis_max_px'], 0.001):.3f} pixels, and the stored model inputs "
-     f"differed from a fresh resize of the originals by at most "
-     f"{max(QN['gt_prepost_checks']['resize_mean_absdiff']):.1f} grey levels (JPEG compression). Boxes narrower or "
+     f"labels were converted to pixel boxes and binary furcation masks at that resolution (Figure 4); this chain was "
+     f"verified on the {len(QC['main'])} radiographs of Figure 4 (checks in the legend). Boxes narrower or "
      f"shorter than 2 pixels after resizing were discarded. "
      f"One near-duplicate pair crossing the published training and validation splits, drawn at random, was "
      f"pixel-identical (mean absolute difference {QN['dup_mean_absdiff']:.2f} grey levels; Supplementary Figure S1).")
@@ -274,17 +271,17 @@ para("The foundation-model detectors used a frozen DINOv2-base backbone^{28} (la
      "output because the default ReLU output collapsed to zero-size boxes on frozen features in pilot runs. These "
      "models were trained for 20 epochs with AdamW (learning rate 2 × 10⁻⁴, weight decay 10⁻⁴, warm-up and cosine "
      "decay, batch 4, seed 0), with horizontal flip and brightness/contrast jitter as the only augmentation. Input "
-     "resolution was therefore comparable between the two families (long side 1,280 vs 1,316 pixels), whereas the "
+     "resolution was comparable between the two families (long side 1,280 vs 1,316 pixels), whereas the "
      "backbone (fine-tuned vs frozen), pretraining (COCO detection vs self-supervised), schedule (60 vs 20 epochs) and "
-     "augmentation differed. The architecture is shown in Figure 5. Training settings are listed in Supplementary "
-     "Table S2; training curves are in Supplementary Figure S2. Every detector kept at most 100 detections per image "
-     "across all 14 classes.")
+     "augmentation differed (architecture in Figure 5; settings in Supplementary Table S2; training curves in "
+     "Supplementary Figure S2). Benchmark hyperparameters were Ultralytics defaults and were not tuned. Every "
+     "detector kept at most 100 detections per image across all 14 classes.")
 head("2.4 Pre-specified protocol and outcomes", 2)
-para("The endpoint, protocol and decision rules were fixed in a dated file (PREREGISTERED_DECISIONS.md, 5 November "
-     "2026, released with the code) before any BiFurca-DINO evaluation result existed. The file was not deposited in a "
-     "public registry, and it was written after a fold-0 YOLOv8m pilot and after DINOv2 pilot runs that produced "
-     "degenerate boxes and led to the softplus regression head; we therefore describe the analysis as pre-specified "
-     "rather than pre-registered. Final-epoch weights "
+para("The endpoint, protocol and decision rules were fixed in a dated file (5 November 2026, released with the code "
+     "under its original name, PREREGISTERED_DECISIONS.md) before any BiFurca-DINO evaluation result existed. The file "
+     "was not deposited in a public registry, and it was written after a fold-0 YOLOv8m pilot and after DINOv2 pilot "
+     "runs that produced degenerate boxes and led to the softplus regression head; we therefore describe the analysis "
+     "as pre-specified rather than pre-registered. Final-epoch weights "
      "were evaluated for every model; no checkpoint, threshold or configuration was chosen on test data. The primary "
      "endpoint was pooled out-of-fold furcation AP@50 (COCO 101-point interpolation) over all development images, each "
      "predicted by the model that had not seen it. Secondary outcomes were furcation AP@50:95, lesion recall at 0.1, "
@@ -302,7 +299,7 @@ para(f"Confidence intervals came from {N['n_boot']:,} bootstrap resamples of dup
      "replaced the group bootstrap by an image-level bootstrap, and repeated the conformal analysis with matching at "
      "IoU 0.5. Comparisons other than the pre-specified criteria were not adjusted for multiplicity, and P(A>B) is a "
      "bootstrap proportion, not a P value. The qualitative figures, score maps and the operating point used to display "
-     "them were post hoc and are descriptive. Reporting was guided by TRIPOD+AI.^{35}")
+     "them were post hoc and are descriptive. Reporting was guided by TRIPOD+AI^{35} and CLAIM 2024.^{36}")
 head("2.5 Ethics", 2)
 para("Only a de-identified public dataset was used; no new radiographs were taken and no ethics approval was required.")
 
@@ -315,15 +312,16 @@ para(f"{NAME[bb]} had the highest pooled furcation AP@50, {ci(bb)} (Table 2; Fig
      f"{ci('plain')}. Relative to {NAME[bb]}, BiFurca-DINO differed by {dci(pfb)} and the plain model by {dci(ppb)} "
      f"(Table 3; Figure 7). Among the benchmarks, "
      + "; ".join(f"{NAME[bb]} minus {NAME[b]} was {dci(P[f'{bb}__vs__{b}'])}" for b in others if f"{bb}__vs__{b}" in P)
-     + ". Precision-recall curves are shown in Supplementary Figure S3.")
+     + " (precision-recall curves in Supplementary Figure S3).")
 para(f"Furcation AP@50:95 was low for every model ({f3(min(N[v]['fur5095'] for v in BENCH + ['plain', 'full']))}–"
      f"{f3(max(N[v]['fur5095'] for v in BENCH + ['plain', 'full']))}), so boxes were rarely tight. At 0.25 false-positive "
      f"boxes per image, lesion recall was {f3(N[bb]['r025'])} for {NAME[bb]} and {f3(N['full']['r025'])} for "
      f"BiFurca-DINO (Supplementary Figure S4).")
 head("3.2 Pre-specified criteria and ablations", 2)
-para(f"BiFurca-DINO and the plain DINOv2 detector were indistinguishable: {dci(pfp)}. Criterion 1 therefore failed, "
-     f"and so did criteria 2–4 (Table 4). Under the pre-specified rule, the new-architecture claim is withdrawn and "
-     f"this study is reported as a benchmark. " + abl_text)
+para(f"BiFurca-DINO and the plain DINOv2 detector were indistinguishable: {dci(pfp)}; the interval excludes a gain "
+     f"from the three modules larger than {pfp['ci'][1]:.3f} AP. Criterion 1 was therefore not met, nor were criteria "
+     f"2–4 (Table 4). As the pre-specified rule requires, no new-architecture claim is made and the study is reported "
+     f"as a benchmark. " + abl_text)
 head("3.3 Fold-to-fold variation and external set", 2)
 para(f"Furcation AP@50 varied widely between folds of 46–72 boxes, from {f3(spread[bb][0])} to {f3(spread[bb][1])} for "
      f"{NAME[bb]} and from {f3(spread['full'][0])} to {f3(spread['full'][1])} for BiFurca-DINO (Figure 1B; "
@@ -334,8 +332,12 @@ para(f"Furcation AP@50 varied widely between folds of 46–72 boxes, from {f3(sp
      f"AP@50 was highest for {NAME[ext_best]} ({f3(N[ext_best]['ext'])}, range over fold models "
      f"{f3(N[ext_best]['ext_min'])}–{f3(N[ext_best]['ext_max'])}); "
      + ", ".join(f"{NAME[v]} {f3(N[v]['ext'])}" for v in BENCH + ['plain', 'full'] if v != ext_best) +
-     f". With so few external lesions these estimates are imprecise, and the external ranking "
-     + ("differed from" if ext_best != bb else "matched") + " the development ranking.")
+     f". The external ranking "
+     + ("differed from" if ext_best != bb else "matched") + " the development ranking"
+     + (f"; in particular, BiFurca-DINO ({f3(N['full']['ext'])}) was close to {NAME[bb]} ({f3(N[bb]['ext'])}) "
+        f"externally despite the large development gap" if abs(N['full']['ext'] - N[bb]['ext']) < 0.02 else "")
+     + f". With {N['ext_fur']} external lesions these estimates are too imprecise to rank detectors, so the "
+     f"pre-specified primary endpoint rests on the development set.")
 head("3.4 Recall control, other findings and sensitivity analyses", 2)
 feas = [(v, a) for v in BENCH + ["plain", "full"] + ABL for a in ("0.1", "0.2") if N[v]["conf"][a]["folds_feasible"] > 0]
 para(f"The conformal threshold for 90% lesion recall was infeasible in every fold for every model, and the 80% target "
@@ -345,8 +347,9 @@ para(f"The conformal threshold for 90% lesion recall was infeasible in every fol
      + ("neither target was feasible in any model-fold" if N['conf05_feasible']['0.1'] == N['conf05_feasible']['0.2'] == 0
         else f"the 90% and 80% targets were feasible in {N['conf05_feasible']['0.1']} and {N['conf05_feasible']['0.2']} model-folds")
      + ". The reason is that a share of "
-     f"furcation lesions received no overlapping prediction at any score. In the pooled out-of-fold predictions "
-     f"(IoU 0.5), the highest recall reached at the lowest score threshold was {f3(maxrec)} ({NAME[maxrec_v]})"
+     f"furcation lesions received no overlapping prediction among the saved detections (at most 100 per image). In "
+     f"the pooled out-of-fold predictions (IoU 0.5), the highest recall reached at the lowest score threshold was "
+     f"{f3(maxrec)} ({NAME[maxrec_v]})"
      + (f", against {f3(N['full']['max_recall'])} for BiFurca-DINO" if maxrec_v == bb else
         f"; it was {f3(N[bb]['max_recall'])} for {NAME[bb]} and {f3(N['full']['max_recall'])} for BiFurca-DINO") +
      f". Mean AP@50 for "
@@ -375,7 +378,7 @@ qc = QN["qual_counts"]
 para(f"Figure 8 shows four development radiographs with furcation lesions, drawn at random before any output was "
      f"viewed, each scored by the fold model that had not seen it, at the score threshold giving 0.25 false-positive "
      f"furcation boxes per image in the pooled out-of-fold predictions (a post hoc display setting, not a validated "
-     f"operating point). These four images are illustrative only. Across the {sum(qc['rtdetr-l'][k] for k in (0, 2))} annotated lesions in these "
+     f"operating point). Across the {sum(qc['rtdetr-l'][k] for k in (0, 2))} annotated lesions in these "
      f"images, {NAME[bb]} found {qc['rtdetr-l'][0]}, YOLO11m {qc['yolo11m'][0]} and BiFurca-DINO {qc['full'][0]}; "
      f"BiFurca-DINO also produced {qc['full'][1]} false positive" + ("s" if qc['full'][1] != 1 else "") +
      f". Across the {MS['n_images']} radiographs with saved score maps (Figure 9; external examples in Supplementary "
@@ -387,64 +390,64 @@ para(f"Figure 8 shows four development radiographs with furcation lesions, drawn
      f"(scores ≥ 0.05) fell inside the furcation boxes, which covered a median {MS['box_area_share_median']:.4f} of the "
      f"image" + MASS_SENT + ". The label-free midline estimate fell between "
      f"{QN['midline']['min']:.0f} and {QN['midline']['max']:.0f} pixels on 12 random radiographs (image centre "
-     f"{1316 / 2:.0f}; Supplementary Figure S8); no reference midline was annotated, so this shows only that the "
-     f"estimate stayed near the image centre, not that it was anatomically accurate. Of the six "
+     f"{1316 / 2:.0f}; Supplementary Figure S8); with no reference midline annotated, this shows only that the "
+     f"estimate stayed near the image centre. Of the six "
      f"highest-scoring false positives of {NAME[bb]}, {QN['fp_overlapping_gt']} overlapped an annotated furcation but "
      f"did not reach 50% overlap (Supplementary Figure S9), so part of the measured error reflects box geometry "
      f"rather than missed anatomy; across the pooled set, {NAME[bb]} produced {QN['n_fp_total']} false-positive and "
      f"{QN['n_fn_total']} missed furcation boxes at this operating point.")
 
 # ================================================================== DISCUSSION
-head("4. Why reported accuracy misleads")
-head("4.1 What the evidence says", 2)
+SEL_GAIN = N["old_selected"] - N["old_final"]; ARCH_GAP = -pfb["point"]
+assert SEL_GAIN > ARCH_GAP and fold_gap > ARCH_GAP     # "as much as architecture" is decided by the numbers
+head("4. Interpretation")
+head("4.1 Main findings", 2)
 para(f"When near-duplicates were kept within folds, weights were fixed in advance and every image was predicted out "
-     f"of fold, the best of the tested detectors found furcation lesions on panoramic radiographs with an AP@50 of "
-     f"{ci(bb)}, and no model's pooled lesion recall exceeded {f3(maxrec)}, even at its lowest score threshold. "
-     f"Tooth-level classification studies report accuracies of 92–98%,^{{17–20}} but accuracy on pre-cropped teeth and "
-     f"AP for lesion detection on full radiographs measure different things and cannot be compared; the closest "
-     f"same-metric figure is a furcation AP@50 of 0.577 on periapical radiographs, where the field of view is "
-     f"smaller and the furcation larger in the image.^{{21}} Our anatomy-informed foundation-model detector failed "
-     f"every pre-specified criterion, and its added modules changed nothing measurable compared with the plain "
-     f"DINOv2 detector.")
-head("4.2 Why single-split estimates mislead", 2)
+     f"of fold, the best tested detector reached a furcation AP@50 of {ci(bb)}, and no model's pooled lesion recall "
+     f"exceeded {f3(maxrec)}. Tooth-level classification studies report accuracies of 92–98%,^{{17–20}} but accuracy "
+     f"on pre-cropped teeth and AP for lesion detection on full radiographs measure different things and cannot be "
+     f"compared; the closest same-metric figure is a furcation AP@50 of 0.577 on periapical radiographs, where the "
+     f"field of view is smaller and the furcation larger in the image.^{{21}} The anatomical modules of BiFurca-DINO "
+     f"added no measurable benefit over the plain DINOv2 detector. Evaluation choices moved AP more than architecture "
+     f"choices did: checkpoint selection changed AP by {SEL_GAIN:.3f} and fold choice by up to {f3(fold_gap)}, against "
+     f"{f3(ARCH_GAP)} between the best fine-tuned and the frozen foundation-model detector.")
+head("4.2 Sources of optimism in single-split estimates", 2)
 para(f"Three mechanisms can make single-split figures optimistic, and our data measure two of them. First, model "
      f"selection on a small validation set: with {N['fur_valid_orig']} furcation boxes, the score of one training run "
-     f"swung from {f3(N['old_min'])} to {f3(N['old_selected'])} across checkpoints, and reporting the maximum instead "
-     f"of the final epoch added {N['old_selected'] - N['old_final']:.3f} AP on the same split. Second, split-to-split "
-     f"variance: even under grouped cross-validation, folds of 46–72 furcation boxes gave scores that differed by up "
-     f"to {f3(spread[bb][1] - spread[bb][0])} for the same detector, so a single split can rank detectors wrongly. "
-     f"Third, near-duplicate leakage: {N['cross_split_dups']} near-duplicate pairs crossed the published splits, one of "
-     f"them pixel-identical, which allows a model to be scored on images it has memorised.^{{26,27}} We did not measure "
-     f"how much this inflates AP, because doing so requires training on the leaky published split; within our grouped "
-     f"folds, removing every image that had a near-duplicate changed {NAME[bb]}'s AP by only {-LEAK_DELTA:+.3f}, which "
-     f"suggests only that these images are not systematically easier or harder than the rest; it says nothing about "
-     f"how much a leaky split would inflate AP. The best-detector AP of {f3(N[bb]['fur'])} and the earlier single-split {f3(N['old_selected'])} "
-     f"come from different models and test sets and should not be compared directly. Studies should therefore report "
-     f"pooled out-of-fold or multi-site estimates with confidence intervals, describe how duplicates were handled, "
-     f"and state which weights were evaluated.")
-head("4.3 Why the foundation-model detector failed", 2)
+     f"ranged from {f3(N['old_min'])} to {f3(N['old_selected'])} across checkpoints, and reporting the maximum instead "
+     f"of the final epoch added {SEL_GAIN:.3f} AP on the same split. Second, split-to-split variance: even under "
+     f"grouped cross-validation, folds of 46–72 furcation boxes gave scores that differed by up to {f3(fold_gap)} for "
+     f"the same detector, enough to reverse a ranking. Third, near-duplicate leakage: {N['cross_split_dups']} "
+     f"near-duplicate pairs crossed the published splits, one of them pixel-identical, so a model can be scored on "
+     f"images it has memorised.^{{26,27}} Measuring the resulting inflation would require training on the leaky "
+     f"published split, which we did not do. Within our grouped folds, removing every image that had a near-duplicate "
+     f"changed {NAME[bb]}'s AP by {-LEAK_DELTA:+.3f}; this suggests that these images are not systematically easier "
+     f"or harder than the rest, but it does not show how much a leaky split inflates AP. The earlier single-split value ({f3(N['old_selected'])}) and "
+     f"the present best ({f3(N[bb]['fur'])}) come from different models and test sets and are not compared directly. "
+     f"Studies should report pooled out-of-fold or multi-site estimates with confidence intervals, describe how "
+     f"duplicates were handled, and state which weights were evaluated.")
+head("4.3 Why the frozen foundation-model detectors scored lower", 2)
 para("The DINOv2 backbone was frozen and its features have a stride of 14 pixels, while the median furcation box "
      f"measured {QN['gt']['med_w']:.0f} × {QN['gt']['med_h']:.0f} pixels at model input, about two patches across "
-     "(Figure 3C). Input resolution was comparable between the two families, so resolution alone does not explain the "
-     "gap. The benchmarks, however, adapted every layer to dental radiographs from detection-pretrained weights over "
-     "three times as many epochs with stronger augmentation, whereas the DINOv2 detectors could only re-weight frozen, "
-     "general-purpose features. One plausible reading is that the faint inter-radicular radiolucency is not well "
+     "(Figure 3C). Input resolution was comparable, so resolution alone does not explain the gap. The benchmarks "
+     "adapted every layer from detection-pretrained weights over three times as many epochs with stronger "
+     "augmentation, whereas the DINOv2 detectors could only re-weight frozen, general-purpose features. One plausible "
+     "reading is that the faint inter-radicular radiolucency is not well "
      "represented in frozen DINOv2 features at this scale, and modules acting on top of those features cannot recover "
      "detail the features lack" + ("; the broad, mutually similar score maps (Figure 9) fit this reading"
                                    if _r >= 0.4 and _m < 0.5 else "") + ". It remains a hypothesis: the study did not fine-tune the backbone, change its resolution or equalise schedule and "
      "augmentation, so the comparison is between two practical recipes, not between architectures at equal compute.")
 head("5. A minimum evaluation standard for radiographic furcation detection")
-para("We propose that a furcation-detection study should not claim a new or better detector unless it meets the ten "
-     "items in Table 5. None is technically demanding; each removes a specific source of optimism that the evidence "
-     "above either shows to be large (model selection, split variance) or cannot exclude (leakage, unregistered "
-     "analytic choices). The items extend general reporting guidance^{27,35} to the particular problems of a "
-     "rare, small radiographic finding. Table 5 also shows how the present benchmark meets each item, so that the "
-     "standard is demonstrably achievable with a public dataset and modest compute.")
+para("We propose that a claim of a new or better furcation detector should meet the ten items in Table 5. Each item "
+     "addresses a source of optimism that the evidence above either shows to be large (model selection, split "
+     "variance) or cannot exclude (leakage, unregistered analytic choices). The items extend general reporting "
+     "guidance^{27,35,36} to the problems of a rare, small radiographic finding. Table 5 also shows how the present "
+     "benchmark addressed each item, fully or in part, with a public dataset and modest compute.")
 STANDARD = [
     ["1. Duplicate audit", "Hash every image; report near-duplicate pairs and how many cross splits.",
      f"{N['near_dup_pairs']} pairs found, {N['cross_split_dups']} across published splits"],
     ["2. Group-disjoint splits", "Keep all copies of a patient/image in one split or fold.",
-     f"{N['n_groups']:,} groups, five group-disjoint folds"],
+     f"{N['n_groups']:,} image groups, five group-disjoint folds (partly met: no patient identifiers)"],
     ["3. No selection on reported data", "Fix weights, thresholds and configurations without the reported test data.",
      "Final-epoch weights; thresholds from calibration groups only"],
     ["4. Pooled or multi-site estimates with intervals", "Report pooled out-of-fold or multi-site AP with a resampling CI.",
@@ -454,75 +457,85 @@ STANDARD = [
     ["6. Untouched external set", "Score an external set that played no part in any decision.",
      f"{N['ext_images']} clinic images, {N['ext_dup_in_pool']} duplicates of the pool"],
     ["7. Strong fine-tuned baselines", "Compare with current fine-tuned CNN and transformer detectors, not only older ones.",
-     "YOLOv8m, YOLO11m, RT-DETR-L"],
+     "YOLOv8m, YOLO11m, RT-DETR-L (default hyperparameters, not tuned)"],
     ["8. Paired comparisons", "Compare models on the same resamples and report the difference with its interval.",
      "Paired group bootstrap, P(A>B), folds won, external difference"],
     ["9. Pre-specified rules and ablations", "Fix in advance, ideally in a public registry, what counts as an improvement; ablate every new component.",
-     "Four criteria fixed in a dated file before any BiFurca result (not publicly registered); three single-module ablations"],
+     "Four criteria fixed in a dated file before any BiFurca result (partly met: not publicly registered); three single-module ablations"],
     ["10. Open splits, predictions and code; report negatives", "Release fold assignment, per-image predictions and code; publish failed claims.",
-     "All released (Data and Code Availability); negative result reported"],
+     "All released (Data and Code Availability); null result reported"],
 ]
-head("6. Where the frontier actually is", 1)
-para(f"If the standard is applied, the open problems look different from those suggested by architecture-centred "
-     f"papers. First, recall: no model's pooled lesion recall exceeded {f3(maxrec)}, so the binding constraint for a "
-     f"screening use is proposal coverage, not ranking. Methods that guarantee coverage, for example tooth-first "
-     f"pipelines that examine every molar furcation region, or conformal recall control,^{{34}} are more relevant than a "
-     f"further gain in AP. Second, localisation: AP at IoU 0.75 was near zero for every model, so box geometry on "
-     f"panoramic radiographs is poorly defined, and region-level or tooth-level outputs may be a better target. Third, "
-     f"reference standard: labels without probing or Hamp grade cannot show clinical accuracy; paired panoramic, "
-     f"periapical or cone-beam images with clinical charting are needed.^{{2,6,15,16}} Fourth, data: the external set "
-     f"held {N['ext_fur']} furcation boxes, too few to rank detectors; multi-site sets with hundreds of lesions are "
-     f"required. Fifth, foundation models: a frozen DINOv2 backbone was clearly weaker than fine-tuned detectors here, "
-     f"so the open question is whether fine-tuned or higher-resolution foundation backbones help, tested under the "
-     f"same standard.")
+head("6. Open problems", 1)
+para(f"If the standard is applied, the open problems differ from those suggested by architecture-centred papers. "
+     f"First, recall: no model's pooled lesion recall exceeded {f3(maxrec)}, so for screening the binding constraint "
+     f"is proposal coverage, not ranking. Methods that guarantee coverage, such as tooth-first pipelines that examine "
+     f"every molar furcation region, or conformal recall control,^{{34}} matter more than a further gain in AP. Second, "
+     f"localisation: AP at IoU 0.75 was near zero for every model, so furcation boxes on panoramic radiographs are "
+     f"poorly defined, and region-level or tooth-level outputs may be a better target. Third, reference standard: "
+     f"labels without probing or Hamp grade cannot show clinical accuracy; paired panoramic, periapical or cone-beam "
+     f"images with clinical charting are needed.^{{2,6,15,16}} Fourth, data: the external set held {N['ext_fur']} "
+     f"furcation boxes, too few to rank detectors; multi-site sets with hundreds of lesions are required. Fifth, "
+     f"foundation models: a frozen DINOv2 backbone scored lower than fine-tuned detectors here, so whether fine-tuned "
+     f"or higher-resolution foundation backbones help remains to be tested under the same standard.")
 head("7. Alternative views", 1)
 para("One objection is that tooth-level classification studies already report high accuracy, so detection is the "
      "wrong benchmark.^{17–20} Those studies start from a pre-cropped tooth and answer an easier question; a clinical "
-     "tool on a full panoramic radiograph must first find the right region, which is exactly where our evidence shows "
-     "the losses. A second objection is that our foundation-model result reflects a frozen backbone and a shorter "
-     "schedule rather than foundation models as such. We agree, and we draw no conclusion about foundation models in "
-     "general; our point is that an architectural addition must beat both its own plain backbone and strong fine-tuned "
-     "baselines under the same protocol before it is called progress. A third objection is that fixing decision rules "
-     "in advance is too rigid for engineering research. Our own case suggests the opposite: without fixed rules, the "
-     "earlier best checkpoint would have been reported as the result"
-     + (f", and the new modules could have been presented on the strength of the external set, where BiFurca-DINO "
-        f"scored {f3(N['full']['ext'])} against {f3(N['plain']['ext'])} for the plain model on only {N['ext_fur']} lesions"
+     "tool on a full panoramic radiograph must first find the right region, which is where our evidence shows the "
+     "losses. A second objection is that our foundation-model result reflects a frozen backbone and a shorter "
+     "schedule rather than foundation models as such. We agree and draw no conclusion about foundation models in "
+     "general; the test of the anatomical modules (criterion 1) compares BiFurca-DINO with its own plain backbone under "
+     "identical training, so it is not affected by this difference. A third objection is that fixing decision rules "
+     "in advance is too rigid for engineering research. Our case suggests otherwise: without fixed rules, the earlier "
+     "best checkpoint would have been reported as the result"
+     + (f", and the modules could have been presented on the strength of the external set, where BiFurca-DINO "
+        f"scored {f3(N['full']['ext'])} against {f3(N['plain']['ext'])} for the plain model on {N['ext_fur']} lesions"
         if N["full"]["ext"] > N["plain"]["ext"] else "") + ".")
 head("8. Clinical implications", 1)
-para("The best detectors find some furcation lesions but miss many, and most boxes are loose. They could at most "
-     "prompt a closer look at a molar; they cannot rule furcation involvement out, and they do not grade it. Probing, "
-     "and three-dimensional imaging where needed, remain the reference. Published accuracy figures for radiographic "
-     "furcation detection should be interpreted alongside the evaluation protocol that produced them.^{15,16,36}")
+para(f"At 0.25 false-positive boxes per image, the best detector reached a lesion recall of {f3(N[bb]['r025'])}, and "
+     "few boxes were tight. Such a detector could prompt a closer look at a molar but cannot rule furcation "
+     "involvement out or grade it. Probing, and three-dimensional imaging where needed, remain the reference. "
+     "Published accuracy figures for radiographic furcation detection should be interpreted alongside the evaluation "
+     "protocol that produced them.^{15,16,37}")
 head("9. Limitations", 1)
 para("Data. The evidence comes from a single public dataset whose labels have unknown inter-observer agreement and "
      "no Hamp grade, probing or three-dimensional reference, so the reported figures measure agreement with the "
      "annotators, not clinical accuracy. Patient identifiers were not available, so near-duplicate images rather than "
      "patients defined the groups; different radiographs of the same patient may still fall in different folds. The "
-     f"external set held only {N['ext_fur']} furcation boxes, too few for a stable ranking.")
-para("Design. The decision rules were fixed in a dated file before any BiFurca-DINO result, but not in a public "
-     "registry, and after pilot runs. The two detector families differed in backbone training, pretraining, schedule "
-     "and augmentation, so the gap between them cannot be attributed to any single factor. Each configuration was "
-     "trained once (seed 0); extra seeds, a larger backbone and other schedules were pre-specified only if BiFurca-DINO "
-     "passed its criteria and were not run. Every detector kept at most 100 detections per image across all 14 "
-     "classes, which can crowd out low-scoring furcation candidates on busy radiographs and lowers the attainable "
-     "recall for all models.")
-para("Analysis. The effect of near-duplicate leakage on AP was not measured. The single-split comparison uses an "
-     "earlier, unpublished run of a different model. Secondary comparisons were not adjusted for multiplicity. The "
-     "qualitative figures, score maps and display threshold were post hoc and based on few images, and the label-free "
-     "midline could not be checked against a reference.")
+     f"external set held {N['ext_fur']} furcation boxes, too few for a stable ranking"
+     + (f"; on it BiFurca-DINO ({f3(N['full']['ext'])}) was close to {NAME[bb]} ({f3(N[bb]['ext'])}), which may reflect "
+        f"chance or a real difference in transfer that this set cannot resolve" if abs(N['full']['ext'] - N[bb]['ext']) < 0.02 else "")
+     + ".")
+para("Design. The decision rules were fixed in a dated file before any BiFurca-DINO result, but after pilot runs and "
+     "without a public registry or third-party timestamp, so readers cannot verify the date independently. The "
+     "position-paper framing was adopted after the pre-specified criteria were not met; the analyses are reported as "
+     "specified, all results and predictions are released, and the recommendations rest on the cited literature as "
+     "well as on this benchmark. The two detector families differed in backbone training, pretraining, schedule and "
+     "augmentation, so the gap between them cannot be attributed to any single factor. Benchmark hyperparameters were "
+     "not tuned, so their AP shows what default fine-tuning achieves, not the ceiling of these architectures. Each "
+     f"configuration was trained once (seed 0); the paired interval excludes a module gain larger than "
+     f"{pfp['ci'][1]:.3f} AP for this seed but does not include seed-to-seed variance, and extra seeds, a larger "
+     "backbone and other schedules were pre-specified only if BiFurca-DINO passed its criteria. Every detector kept at "
+     "most 100 detections per image across all 14 classes, which can crowd out low-scoring furcation candidates; the "
+     "reported recall ceilings and conformal infeasibility hold under this cap.")
+para("Analysis. The effect of near-duplicate leakage on AP was not measured. The single-split evidence comes from an "
+     "earlier, unpublished run of a different model by the same author; its checkpoint values are listed in "
+     "Supplementary Table S1, but that run is not part of the released pipeline. Secondary comparisons were not "
+     "adjusted for multiplicity. The qualitative figures, score maps and display threshold were post hoc and based on "
+     "few images, and the label-free midline could not be checked against a reference. Finally, the ten-item standard "
+     "is a single-author proposal; it has not been tested for feasibility across groups or agreed by formal consensus, "
+     "and should be refined by both.")
 
 head("10. Conclusions")
 para(f"On one public dataset, evaluated with group-disjoint folds, fixed weights and pre-specified decision rules, the "
-     f"best of the tested detectors reached a furcation AP@50 of {ci(bb)} and no detector's pooled lesion recall "
-     f"exceeded {f3(maxrec)}. Anatomical priors added to a frozen DINOv2 detector gave no measurable benefit, and on a "
-     f"single small validation split the choice of checkpoint alone moved AP from {f3(N['old_final'])} to "
-     f"{f3(N['old_selected'])}. We interpret these results as showing that, for radiographic furcation detection, "
-     "the evaluation protocol currently limits what can be claimed at least as much as the architecture does: "
-     "estimates from small single splits are too unstable to rank detectors, and a new component should be credited "
-     "only after it beats its own baseline and strong fine-tuned detectors under the same protocol. We propose the "
-     "standard in Table 5 as a minimum for such claims. Whether better lesion coverage, clinical reference standards, "
-     "multi-site data or fine-tuned foundation backbones will close the gap is the open question; the present data "
-     "show that the gap is large and that current detectors cannot rule furcation involvement out.")
+     f"best tested detector reached a furcation AP@50 of {ci(bb)}, and no detector's pooled lesion recall exceeded "
+     f"{f3(maxrec)}. Anatomical priors added to a frozen DINOv2 detector gave no measurable benefit, whereas checkpoint "
+     f"choice on a single small validation split moved AP from {f3(N['old_final'])} to {f3(N['old_selected'])}. We "
+     "infer that, for radiographic furcation detection, evaluation choices currently change reported accuracy as much "
+     "as architecture does: small single splits are too unstable to rank detectors, and a new component should be "
+     "credited only after it beats its own baseline and strong fine-tuned detectors under the same protocol. We "
+     "propose the standard in Table 5 as a minimum for such claims. The main gap is lesion coverage rather than "
+     "ranking, and closing it will need clinical reference standards, multi-site data and methods that examine every "
+     "furcation region; until then, panoramic detectors can support but not replace clinical probing.")
 
 # ================================================================== DECLARATIONS
 head("Declarations")
@@ -543,7 +556,7 @@ para("All code is openly available at " + REPO + " under the MIT licence: datase
 para("P.K.Y. conceived the study, designed the protocol, ran the analyses and wrote the manuscript.", "Author contributions:")
 para("An AI assistant (Claude, Anthropic) was used to help write analysis code and draft text. The author checked the "
      "code, the outputs and the text and takes full responsibility for the content.", "Use of AI tools:")
-para("Reporting was guided by TRIPOD+AI.", "Reporting guideline:")
+para("TRIPOD+AI and CLAIM 2024.", "Reporting guidelines:")
 
 # ================================================================== REFERENCES
 REFS = [
@@ -582,6 +595,7 @@ REFS = [
     "Tian Z, Shen C, Chen H, He T. FCOS: fully convolutional one-stage object detection. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). 2019:9627–9636.",
     "Angelopoulos AN, Bates S. Conformal prediction: a gentle introduction. Found Trends Mach Learn. 2023;16(4):494–591.",
     "Collins GS, Moons KGM, Dhiman P, et al. TRIPOD+AI statement: updated guidance for reporting clinical prediction models that use regression or machine learning methods. BMJ. 2024;385:e078378.",
+    "Tejani AS, Klontzas ME, Gatti AA, et al. Checklist for Artificial Intelligence in Medical Imaging (CLAIM): 2024 update. Radiol Artif Intell. 2024;6(4):e240300.",
     "Ekert T, Krois J, Meinhold L, et al. Deep learning for the radiographic detection of apical lesions. J Endod. 2019;45(7):917–922.e5.",
 ]
 head("References")
@@ -600,11 +614,11 @@ table_csv("Table4_paired_comparisons", "Table 3. Paired comparisons of furcation
           "Paired group bootstrap on identical resamples. P(A > B): share of resamples in which A scored higher. "
           "External difference: difference of the external means.")
 table_csv("Table3_preregistered_criteria", "Table 4. Pre-specified criteria for claiming a new detector (all four required).")
-table_rows(["Item", "Requirement", "How this study met it"], STANDARD,
+table_rows(["Item", "Requirement", "How this study addressed it"], STANDARD,
            "Table 5. Proposed minimum evaluation standard for radiographic furcation detection.",
            "A study that does not meet an item should state so and explain why.")
 with open(os.path.join(TAB, "Table5_minimum_evaluation_standard.csv"), "w", newline="", encoding="utf-8") as f:
-    csv.writer(f).writerows([["Item", "Requirement", "How this study met it"]] + STANDARD)
+    csv.writer(f).writerows([["Item", "Requirement", "How this study addressed it"]] + STANDARD)
 doc.add_page_break(); head("Figures")
 gc = QN["gt_prepost_checks"]
 FIGS = [
