@@ -1,7 +1,7 @@
 Comparison (A − B),Difference in furcation AP@50,95% CI,P(A > B),Folds A better,External difference
 BiFurca-DINO (full) − DINOv2-FCOS (plain),+0.000,-0.032 to +0.032,0.482,3/5,+0.057
-BiFurca-DINO (full) − RT-DETR-L,-0.120,-0.179 to -0.068,0.000,0/5,-0.001
-DINOv2-FCOS (plain) − RT-DETR-L,-0.120,-0.176 to -0.073,0.000,0/5,-0.058
+BiFurca-DINO (full) − RT-DETR-L,-0.120,-0.179 to -0.068,< 0.001,0/5,-0.001
+DINOv2-FCOS (plain) − RT-DETR-L,-0.120,-0.176 to -0.073,< 0.001,0/5,-0.058
 BiFurca-DINO (full) − BiFurca w/o mirror,+0.016,-0.019 to +0.050,0.810,3/5,+0.081
 BiFurca-DINO (full) − BiFurca w/o arch coords,+0.014,-0.014 to +0.045,0.854,4/5,+0.083
 BiFurca-DINO (full) − BiFurca w/o context,+0.007,-0.034 to +0.048,0.620,3/5,+0.043

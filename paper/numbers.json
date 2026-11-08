@@ -866,7 +866,7 @@
   ],
   [
    "2. BiFurca beats best benchmark (RT-DETR-L), P \u2265 0.95",
-   "diff -0.120 (-0.179 to -0.068); P = 0.00",
+   "diff -0.120 (-0.179 to -0.068); P < 0.001",
    "No"
   ],
   [

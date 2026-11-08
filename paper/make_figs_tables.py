@@ -166,10 +166,11 @@ save(fig, "Figure4_furcation_PR_curves")
 
 # ---------------------------------------------------------------- Figure 5: paired differences
 P = EX["paired"]
+PF = lambda p, d=2: ("< 0.001" if p == 0 else "> 0.999" if p == 1 else f"{p:.{d}f}")
 fig, ax = plt.subplots(figsize=(6.4, 0.45 * len(P) + 0.9))
 for k, (key, d) in enumerate(list(P.items())[::-1]):
     ax.errorbar(d["point"], k, xerr=[[d["point"] - d["ci"][0]], [d["ci"][1] - d["point"]]], fmt="o", color="#2d3748", capsize=3)
-    ax.text(0.20, k, f"{d['point']:+.3f}  P(A>B)={d['p_a_gt_b']:.2f}", va="center", fontsize=7)
+    ax.text(0.20, k, f"{d['point']:+.3f}  P(A>B) {PF(d['p_a_gt_b']) if d['p_a_gt_b'] in (0, 1) else '= ' + PF(d['p_a_gt_b'])}", va="center", fontsize=7)
 ax.axvline(0, color="#a0aec0", lw=0.8)
 ax.set_yticks(range(len(P))); ax.set_yticklabels([f"{NAME[d['a']]} − {NAME[d['b']]}" for d in list(P.values())[::-1]], fontsize=7.5)
 ax.set_xlim(-0.25, 0.36); ax.set_xlabel("Difference in furcation AP@50 (A − B), paired group bootstrap 95% CI")
@@ -234,8 +235,8 @@ write_csv("Table2_main_results",
 bb = N["best_benchmark"]
 pf = P.get("full__vs__plain"); pb = P.get(f"full__vs__{bb}")
 crit = [
-    ["1. BiFurca beats plain DINOv2, P(diff>0) ≥ 0.95", f"diff {pf['point']:+.3f} ({pf['ci'][0]:+.3f} to {pf['ci'][1]:+.3f}); P = {pf['p_a_gt_b']:.2f}", "No" if pf["p_a_gt_b"] < 0.95 else "Yes"],
-    [f"2. BiFurca beats best benchmark ({NAME[bb]}), P ≥ 0.95", f"diff {pb['point']:+.3f} ({pb['ci'][0]:+.3f} to {pb['ci'][1]:+.3f}); P = {pb['p_a_gt_b']:.2f}", "No" if pb["p_a_gt_b"] < 0.95 else "Yes"],
+    ["1. BiFurca beats plain DINOv2, P(diff>0) ≥ 0.95", f"diff {pf['point']:+.3f} ({pf['ci'][0]:+.3f} to {pf['ci'][1]:+.3f}); P {PF(pf['p_a_gt_b']) if pf['p_a_gt_b'] in (0, 1) else '= ' + PF(pf['p_a_gt_b'])}", "No" if pf["p_a_gt_b"] < 0.95 else "Yes"],
+    [f"2. BiFurca beats best benchmark ({NAME[bb]}), P ≥ 0.95", f"diff {pb['point']:+.3f} ({pb['ci'][0]:+.3f} to {pb['ci'][1]:+.3f}); P {PF(pb['p_a_gt_b']) if pb['p_a_gt_b'] in (0, 1) else '= ' + PF(pb['p_a_gt_b'])}", "No" if pb["p_a_gt_b"] < 0.95 else "Yes"],
     ["3. Direction holds externally and in ≥ 4/5 folds", f"external diff vs {NAME[bb]} {pb['ext_diff']:+.3f}; better in {pb['folds_a_better']}/5 folds",
      "Yes" if (pb["ext_diff"] > 0 and pb["folds_a_better"] >= 4) else "No"],
     ["4. Other-class mAP@50 within 0.02 of best benchmark", f"{N['full']['other']:.3f} vs {N[bb]['other']:.3f} ({N['full']['other'] - N[bb]['other']:+.3f})",
@@ -244,7 +245,7 @@ write_csv("Table3_preregistered_criteria", ["Pre-specified criterion", "Observed
 N["criteria"] = crit
 
 write_csv("Table4_paired_comparisons", ["Comparison (A − B)", "Difference in furcation AP@50", "95% CI", "P(A > B)", "Folds A better", "External difference"],
-          [[f"{NAME[d['a']]} − {NAME[d['b']]}", f"{d['point']:+.3f}", f"{d['ci'][0]:+.3f} to {d['ci'][1]:+.3f}", f"{d['p_a_gt_b']:.3f}",
+          [[f"{NAME[d['a']]} − {NAME[d['b']]}", f"{d['point']:+.3f}", f"{d['ci'][0]:+.3f} to {d['ci'][1]:+.3f}", PF(d['p_a_gt_b'], 3),
             f"{d['folds_a_better']}/5", f"{d['ext_diff']:+.3f}"] for d in P.values()])
 
 write_csv("TableS1_per_class_AP50", ["Class", "Pooled boxes"] + [NAME[v] for v in ORDER],

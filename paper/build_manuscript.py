@@ -171,7 +171,10 @@ para(f"{NAME[bb]} had the highest furcation AP@50, {ci(bb)}, followed by "
      f". Per-fold furcation AP@50 of the best model ranged from {f3(spread[bb][0])} to {f3(spread[bb][1])}. With at "
      f"most 100 detections per image, pooled lesion recall (IoU ≥ 0.5) did not exceed {f3(maxrec)} for any model, and "
      f"a conformal threshold for 80% recall (IoU ≥ 0.3) was feasible in {feas80} of {5 * len(BENCH + DINO)} "
-     f"model-folds. In an earlier single-split analysis of this dataset by the author, the best of six checkpoints "
+     f"model-folds"
+     + "".join(f" (test recall {N[v]['conf']['0.2']['achieved_recall']:.3f})" for v in BENCH + DINO
+               if feas80 == 1 and N[v]['conf']['0.2']['folds_feasible'] == 1) + ". "
+     f"In an earlier single-split analysis of this dataset by the author, the best of six checkpoints "
      f"scored {f3(N['old_selected'])} on {N['fur_valid_orig']} validation boxes and the final epoch "
      f"{f3(N['old_final'])}.", "Evidence (results):")
 para("We propose a ten-item minimum evaluation standard: duplicate audit and group-disjoint splits; no model "
@@ -346,7 +349,12 @@ para(f"The conformal threshold for 90% lesion recall was infeasible in every fol
      f"matching of the pre-specified sensitivity analysis, "
      + ("neither target was feasible in any model-fold" if N['conf05_feasible']['0.1'] == N['conf05_feasible']['0.2'] == 0
         else f"the 90% and 80% targets were feasible in {N['conf05_feasible']['0.1']} and {N['conf05_feasible']['0.2']} model-folds")
-     + ". The reason is that a share of "
+     + "." + "".join(f" In the feasible fold ({NAME[v]}), test recall was {N[v]['conf']['0.2']['achieved_recall']:.3f} at "
+               f"{N[v]['conf']['0.2']['fp_per_image']:.2f} false-positive boxes per image"
+               + (", below the 0.80 target; the conformal guarantee holds on average over calibration sets, not in a "
+                  "single fold with a small calibration set" if N[v]['conf']['0.2']['achieved_recall'] < 0.8 else "") + "."
+               for v in BENCH + DINO if N[v]['conf']['0.2']['folds_feasible'] > 0)
+     + " The reason for infeasibility is that a share of "
      f"furcation lesions received no overlapping prediction among the saved detections (at most 100 per image). In "
      f"the pooled out-of-fold predictions (IoU 0.5), the highest recall reached at the lowest score threshold was "
      f"{f3(maxrec)} ({NAME[maxrec_v]})"
@@ -491,7 +499,8 @@ para("One objection is that tooth-level classification studies already report hi
         f"scored {f3(N['full']['ext'])} against {f3(N['plain']['ext'])} for the plain model on {N['ext_fur']} lesions"
         if N["full"]["ext"] > N["plain"]["ext"] else "") + ".")
 head("8. Clinical implications", 1)
-para(f"At 0.25 false-positive boxes per image, the best detector reached a lesion recall of {f3(N[bb]['r025'])}, and "
+R025_V = max(BENCH + DINO, key=lambda v: N[v]["r025"])
+para(f"At 0.25 false-positive boxes per image, lesion recall was at most {f3(N[R025_V]['r025'])} ({NAME[R025_V]}), and "
      "few boxes were tight. Such a detector could prompt a closer look at a molar but cannot rule furcation "
      "involvement out or grade it. Probing, and three-dimensional imaging where needed, remain the reference. "
      "Published accuracy figures for radiographic furcation detection should be interpreted alongside the evaluation "
@@ -662,7 +671,10 @@ SUPP_TABLES = [
     ("TableS1_per_class_AP50", "Table S5. Pooled out-of-fold AP@50 for each of the 14 findings.", "—: no boxes of this class in the pooled set."),
     ("TableS2_sensitivity", "Table S6. Sensitivity analyses of furcation AP (computed from saved predictions; no retraining).",
      "IoU, intersection-over-union threshold for a match. Duplicate-group images excluded: every image that has a near-duplicate is removed. "
-     "Size tertiles: furcation boxes split into thirds by area; AP computed against one tertile at a time."),
+     "Size tertiles: furcation boxes split into thirds by area; AP computed against one tertile at a time, with all "
+     "predictions kept, so predictions on lesions of other tertiles count as false positives and tertile APs are lower "
+     "than the overall AP; compare tertiles with each other, not with the overall value. Intervals in this table use "
+     "500 resamples (Table 2: 2,000), so they differ slightly from Table 2 by Monte Carlo error."),
     ("TableS3_per_fold_AP50", "Table S3. Furcation AP@50 in each fold.", None),
     ("TableS4_conformal", "Table S4. Split-conformal threshold for lesion recall, calibrated on each fold's calibration groups.",
      "Infeasible: in that fold, more than the allowed share of calibration lesions had no overlapping prediction at any score, so no threshold can reach the target recall."),

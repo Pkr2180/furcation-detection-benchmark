@@ -60,7 +60,7 @@ allowed.add(f"{N[bb]['fur'] - min(N[b]['fur'] for b in ('rtdetr-l', 'yolo11m', '
 allowed.add(f"{N['full']['fur'] / N[bb]['fur']:.0%}".rstrip("%"))
 allowed.add(str(5 * sum(1 for v in RES if not v.endswith("overfit"))))   # model-folds
 CONST = {"14", "12", "13", "0.95", "0.02", "0.1", "0.25", "0.5", "0.3", "0.75", "90", "80", "60", "20", "1,280", "1280", "728", "1,316",
-         "2", "4", "5", "3", "1", "0", "10", "2000", "2,000", "46", "72", "50", "101", "2017", "2024", "0.15", "0.999", "15", "6", "16", "11"}
+         "2", "4", "5", "3", "1", "0", "10", "2000", "2,000", "46", "72", "50", "101", "2017", "2024", "500", "0.15", "0.999", "15", "6", "16", "11"}
 allowed |= CONST
 
 for name in ("Furcation_Benchmark_Manuscript.docx", "Furcation_Benchmark_Supplementary.docx"):
