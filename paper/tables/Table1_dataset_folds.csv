@@ -1,0 +1,8 @@
+Partition,Images,Images with furcation,Furcation boxes
+Fold 0,321,54,70
+Fold 1,329,38,46
+Fold 2,325,41,68
+Fold 3,318,46,72
+Fold 4,335,35,53
+Pooled development set,1628,214,309
+External clinic set,180,12,19

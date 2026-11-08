@@ -1,0 +1,7 @@
+Epoch,"Validation furcation AP@50 (FastViT-SA24 + FCOS, earlier study)"
+5,0.109
+10,0.319
+15,0.372
+20,0.208
+25,0.193
+30,0.197

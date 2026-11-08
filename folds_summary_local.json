@@ -1,0 +1,47 @@
+{
+ "n_pool": 1628,
+ "n_groups": 1416,
+ "largest_groups": [
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  4
+ ],
+ "n_singletons": 1215,
+ "per_fold": {
+  "0": {
+   "images": 321,
+   "with_fur": 54,
+   "fur_boxes": 70
+  },
+  "1": {
+   "images": 329,
+   "with_fur": 38,
+   "fur_boxes": 46
+  },
+  "2": {
+   "images": 325,
+   "with_fur": 41,
+   "fur_boxes": 68
+  },
+  "3": {
+   "images": 318,
+   "with_fur": 46,
+   "fur_boxes": 72
+  },
+  "4": {
+   "images": 335,
+   "with_fur": 35,
+   "fur_boxes": 53
+  }
+ },
+ "external": {
+  "images": 180,
+  "fur_boxes": 19,
+  "with_near_dup_in_pool": 0
+ }
+}

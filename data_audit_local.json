@@ -1,0 +1,265 @@
+{
+ "tree": {
+  ".|.txt": 1,
+  "test/images|.jpg": 99,
+  "test/images|.png": 1,
+  "test/labels|.txt": 100,
+  "test_alte_cabinete|.txt": 1,
+  "test_alte_cabinete/Ext-validation/images|.jpg": 180,
+  "test_alte_cabinete/Ext-validation/labels|.txt": 180,
+  "train/images|.jpg": 1375,
+  "train/labels|.txt": 1375,
+  "valid/images|.jpg": 153,
+  "valid/labels|.txt": 153
+ },
+ "n_images": 1808,
+ "by_dir": {
+  "test/images": {
+   "n_images": 100,
+   "n_label_missing": 0,
+   "boxes_per_class": {
+    "IMP": 25,
+    "PRR": 89,
+    "OBT": 391,
+    "END": 267,
+    "CAR": 141,
+    "BON": 118,
+    "IMT": 58,
+    "API": 80,
+    "ROT": 33,
+    "FUR": 18,
+    "APS": 4,
+    "ORD": 25,
+    "SRD": 120
+   },
+   "images_with_class": {
+    "IMP": 11,
+    "PRR": 40,
+    "OBT": 72,
+    "END": 67,
+    "CAR": 43,
+    "BON": 22,
+    "IMT": 24,
+    "API": 40,
+    "ROT": 13,
+    "FUR": 9,
+    "APS": 2,
+    "ORD": 15,
+    "SRD": 18
+   },
+   "sizes": {
+    "2775x1475": 46,
+    "2648x1475": 28,
+    "2382x1475": 6,
+    "2775x1485": 5
+   }
+  },
+  "test_alte_cabinete/Ext-validation/images": {
+   "n_images": 180,
+   "n_label_missing": 0,
+   "boxes_per_class": {
+    "IMP": 16,
+    "PRR": 206,
+    "OBT": 897,
+    "END": 528,
+    "CAR": 296,
+    "BON": 680,
+    "IMT": 111,
+    "API": 106,
+    "ROT": 93,
+    "FUR": 19,
+    "APS": 17,
+    "ORD": 6,
+    "SRD": 5
+   },
+   "images_with_class": {
+    "IMP": 5,
+    "PRR": 82,
+    "OBT": 130,
+    "END": 120,
+    "CAR": 101,
+    "BON": 79,
+    "IMT": 51,
+    "API": 48,
+    "ROT": 33,
+    "FUR": 12,
+    "APS": 6,
+    "ORD": 3,
+    "SRD": 1
+   },
+   "sizes": {
+    "2760x1504": 166,
+    "2775x1481": 3,
+    "2775x1484": 2,
+    "2398x1156": 1
+   }
+  },
+  "train/images": {
+   "n_images": 1375,
+   "n_label_missing": 0,
+   "boxes_per_class": {
+    "IMP": 456,
+    "PRR": 1492,
+    "OBT": 3615,
+    "END": 2673,
+    "CAR": 2745,
+    "BON": 2763,
+    "IMT": 809,
+    "API": 973,
+    "ROT": 1205,
+    "FUR": 268,
+    "APS": 66,
+    "ROR": 5,
+    "ORD": 451,
+    "SRD": 1049
+   },
+   "images_with_class": {
+    "IMP": 126,
+    "PRR": 540,
+    "OBT": 745,
+    "END": 782,
+    "CAR": 816,
+    "BON": 438,
+    "IMT": 327,
+    "API": 521,
+    "ROT": 416,
+    "FUR": 190,
+    "APS": 42,
+    "ROR": 4,
+    "ORD": 196,
+    "SRD": 213
+   },
+   "sizes": {
+    "2652x1536": 475,
+    "2386x1536": 217,
+    "2868x1504": 211,
+    "2775x1499": 62
+   }
+  },
+  "valid/images": {
+   "n_images": 153,
+   "n_label_missing": 0,
+   "boxes_per_class": {
+    "IMP": 25,
+    "PRR": 103,
+    "OBT": 359,
+    "END": 224,
+    "CAR": 407,
+    "BON": 297,
+    "IMT": 110,
+    "API": 100,
+    "ROT": 171,
+    "FUR": 23,
+    "APS": 4,
+    "ORD": 51,
+    "SRD": 98
+   },
+   "images_with_class": {
+    "IMP": 10,
+    "PRR": 49,
+    "OBT": 80,
+    "END": 79,
+    "CAR": 108,
+    "BON": 49,
+    "IMT": 46,
+    "API": 45,
+    "ROT": 43,
+    "FUR": 15,
+    "APS": 1,
+    "ORD": 18,
+    "SRD": 20
+   },
+   "sizes": {
+    "2652x1536": 44,
+    "2386x1536": 30,
+    "2868x1504": 26,
+    "2775x1499": 6
+   }
+  }
+ },
+ "fur_box_area_frac": {
+  "n": 328,
+  "median": 0.0011287631739812602,
+  "p10": 0.00044826036470000004,
+  "p90": 0.0023936997324000005
+ },
+ "near_duplicate_pairs": 226,
+ "near_duplicate_examples": [
+  [
+   "test/images/v13.jpg",
+   "test/images/v14.jpg",
+   0
+  ],
+  [
+   "test/images/v32.jpg",
+   "test/images/v33.jpg",
+   0
+  ],
+  [
+   "test_alte_cabinete/Ext-validation/images/142.jpg",
+   "test_alte_cabinete/Ext-validation/images/22.jpg",
+   0
+  ],
+  [
+   "test_alte_cabinete/Ext-validation/images/159.jpg",
+   "test_alte_cabinete/Ext-validation/images/19.jpg",
+   2
+  ],
+  [
+   "train/images/1001.jpg",
+   "train/images/1176.jpg",
+   0
+  ],
+  [
+   "train/images/1002.jpg",
+   "train/images/1177.jpg",
+   0
+  ],
+  [
+   "train/images/1003.jpg",
+   "train/images/1178.jpg",
+   0
+  ],
+  [
+   "train/images/1004.jpg",
+   "train/images/1179.jpg",
+   0
+  ],
+  [
+   "train/images/1006.jpg",
+   "train/images/1181.jpg",
+   0
+  ],
+  [
+   "train/images/1006.jpg",
+   "train/images/1182.jpg",
+   0
+  ],
+  [
+   "train/images/1007.jpg",
+   "train/images/1188.jpg",
+   0
+  ],
+  [
+   "train/images/1008.jpg",
+   "train/images/1189.jpg",
+   0
+  ],
+  [
+   "train/images/1009.jpg",
+   "valid/images/1190.jpg",
+   0
+  ],
+  [
+   "train/images/1011.jpg",
+   "train/images/1193.jpg",
+   0
+  ],
+  [
+   "train/images/1013.jpg",
+   "train/images/1403.jpg",
+   0
+  ]
+ ],
+ "cross_dir_dups": 43
+}

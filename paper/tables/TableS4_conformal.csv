@@ -1,0 +1,17 @@
+Model,Target lesion recall,Folds feasible,Achieved recall (test),False-positive boxes per image,Mean threshold
+RT-DETR-L,0.9,0/5,infeasible,—,—
+RT-DETR-L,0.8,0/5,infeasible,—,—
+YOLO11m,0.9,0/5,infeasible,—,—
+YOLO11m,0.8,1/5,0.679,0.830,0.003
+YOLOv8m,0.9,0/5,infeasible,—,—
+YOLOv8m,0.8,0/5,infeasible,—,—
+DINOv2-FCOS (plain),0.9,0/5,infeasible,—,—
+DINOv2-FCOS (plain),0.8,0/5,infeasible,—,—
+BiFurca-DINO (full),0.9,0/5,infeasible,—,—
+BiFurca-DINO (full),0.8,0/5,infeasible,—,—
+BiFurca w/o mirror,0.9,0/5,infeasible,—,—
+BiFurca w/o mirror,0.8,0/5,infeasible,—,—
+BiFurca w/o arch coords,0.9,0/5,infeasible,—,—
+BiFurca w/o arch coords,0.8,0/5,infeasible,—,—
+BiFurca w/o context,0.9,0/5,infeasible,—,—
+BiFurca w/o context,0.8,0/5,infeasible,—,—
