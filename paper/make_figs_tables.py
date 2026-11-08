@@ -148,7 +148,7 @@ ax.set_yticks(range(len(ORDER))); ax.set_yticklabels([NAME[v] for v in ORDER[::-
 ax.set_xlim(0, 0.62); ax.set_xlabel("Furcation AP@50")
 ax.scatter([], [], marker="o", color="k", label="pooled out-of-fold (95% group-bootstrap CI)")
 ax.scatter([], [], marker="D", facecolor="white", edgecolor="k", label="external clinic set (mean of 5 fold models)")
-ax.legend(frameon=False, fontsize=7, loc="lower right")
+ax.legend(frameon=False, fontsize=7, loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2)
 save(fig, "Figure3_primary_endpoint")
 
 # ---------------------------------------------------------------- Figure 4: PR curves
