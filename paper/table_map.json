@@ -1,0 +1,50 @@
+{
+ "supp_tables": [
+  [
+   "TableS5_old_single_split_checkpoints",
+   "Table S1"
+  ],
+  [
+   "TableS6_training_configuration",
+   "Table S2"
+  ],
+  [
+   "TableS3_per_fold_AP50",
+   "Table S3"
+  ],
+  [
+   "TableS4_conformal",
+   "Table S4"
+  ],
+  [
+   "TableS1_per_class_AP50",
+   "Table S5"
+  ],
+  [
+   "TableS2_sensitivity",
+   "Table S6"
+  ]
+ ],
+ "main_tables": [
+  [
+   "Table1_dataset_folds",
+   "Table 1"
+  ],
+  [
+   "Table2_main_results",
+   "Table 2"
+  ],
+  [
+   "Table4_paired_comparisons",
+   "Table 3"
+  ],
+  [
+   "Table3_preregistered_criteria",
+   "Table 4"
+  ],
+  [
+   "Table5_minimum_evaluation_standard",
+   "Table 5"
+  ]
+ ]
+}

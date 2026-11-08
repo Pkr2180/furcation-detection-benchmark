@@ -1,0 +1,78 @@
+{
+ "main": [
+  [
+   "Figure2_single_split_vs_grouped_cv",
+   "Figure 1"
+  ],
+  [
+   "Figure1_study_design",
+   "Figure 2"
+  ],
+  [
+   "Figure3_ground_truth",
+   "Figure 3"
+  ],
+  [
+   "Figure3_furcation_gt_pre_post",
+   "Figure 4"
+  ],
+  [
+   "Figure2_BiFurca_architecture",
+   "Figure 5"
+  ],
+  [
+   "Figure3_primary_endpoint",
+   "Figure 6"
+  ],
+  [
+   "Figure5_paired_differences",
+   "Figure 7"
+  ],
+  [
+   "Figure5_qualitative_predictions",
+   "Figure 8"
+  ],
+  [
+   "Figure6_score_maps",
+   "Figure 9"
+  ]
+ ],
+ "supp": [
+  [
+   "FigureS6_cross_split_duplicate",
+   "Figure S1"
+  ],
+  [
+   "FigureS3_DINO_training_loss",
+   "Figure S2"
+  ],
+  [
+   "Figure4_furcation_PR_curves",
+   "Figure S3"
+  ],
+  [
+   "FigureS4_recall_at_FPPI",
+   "Figure S4"
+  ],
+  [
+   "FigureS1_per_class_AP50",
+   "Figure S5"
+  ],
+  [
+   "FigureS2_sensitivity",
+   "Figure S6"
+  ],
+  [
+   "FigureS8_external_score_maps",
+   "Figure S7"
+  ],
+  [
+   "FigureS9_midline_estimates",
+   "Figure S8"
+  ],
+  [
+   "FigureS7_failure_gallery",
+   "Figure S9"
+  ]
+ ]
+}

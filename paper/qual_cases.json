@@ -1,0 +1,200 @@
+{
+ "seed": 0,
+ "rules": "Pre-specified selection of images for the qualitative figures (run once, BEFORE any qualitative output is viewed).\nRules (seed 0, numpy default_rng):\n  main      4 pooled test images that contain >= 1 furcation box\n  failures  for the best benchmark: the 6 highest-scoring false-positive furcation boxes and 6 random missed lesions\n            at the pre-defined operating point (0.25 false-positive furcation boxes per image)\n  midline   12 random pooled images\n  external  4 random external images that contain >= 1 furcation box\n  gt_example 1 random pooled image with >= 1 furcation box and >= 6 annotated classes\n  duplicate  1 random near-duplicate pair whose members come from different published splits\nWrites paper/qual_cases.json.   python paper/qual_select.py\n",
+ "main": [
+  "train/images/129.jpg",
+  "train/images/267.jpg",
+  "train/images/532.jpg",
+  "train/images/841.jpg"
+ ],
+ "midline": [
+  "test/images/v32.jpg",
+  "train/images/1185.jpg",
+  "train/images/337.jpg",
+  "train/images/406.jpg",
+  "train/images/433.jpg",
+  "train/images/507.jpg",
+  "train/images/551.jpg",
+  "train/images/575.jpg",
+  "train/images/709.jpg",
+  "train/images/841.jpg",
+  "valid/images/1020.jpg",
+  "valid/images/520.jpg"
+ ],
+ "external": [
+  "test_alte_cabinete/Ext-validation/images/11.jpg",
+  "test_alte_cabinete/Ext-validation/images/118.jpg",
+  "test_alte_cabinete/Ext-validation/images/72.jpg",
+  "test_alte_cabinete/Ext-validation/images/91.jpg"
+ ],
+ "gt_example": "train/images/1485.jpg",
+ "duplicate_pair": [
+  "train/images/306.jpg",
+  "valid/images/410.jpg"
+ ],
+ "operating_fppi": 0.25,
+ "thresholds": {
+  "rtdetr-l": 0.130126953125,
+  "yolo11m": 0.03880000114440918,
+  "yolov8m": 0.03350000083446503,
+  "plain": 0.3986999988555908,
+  "full": 0.38280001282691956,
+  "no_mirror": 0.38609999418258667,
+  "no_coords": 0.3882000148296356,
+  "no_context": 0.3977999985218048
+ },
+ "best_benchmark": "rtdetr-l",
+ "failures": {
+  "false_positives": [
+   [
+    0.78955078125,
+    "train/images/12.jpg",
+    [
+     404.1,
+     396.2,
+     451.8,
+     446.9
+    ]
+   ],
+   [
+    0.7861328125,
+    "train/images/211.jpg",
+    [
+     377.9,
+     487.2,
+     417.1,
+     519.5
+    ]
+   ],
+   [
+    0.7626953125,
+    "train/images/476.jpg",
+    [
+     322.1,
+     449.8,
+     365.0,
+     481.5
+    ]
+   ],
+   [
+    0.74951171875,
+    "train/images/149.jpg",
+    [
+     950.8,
+     439.0,
+     976.9,
+     463.2
+    ]
+   ],
+   [
+    0.74951171875,
+    "train/images/651.jpg",
+    [
+     1026.5,
+     439.3,
+     1065.1,
+     464.2
+    ]
+   ],
+   [
+    0.74755859375,
+    "train/images/1506.jpg",
+    [
+     907.6,
+     451.2,
+     943.4,
+     481.7
+    ]
+   ]
+  ],
+  "missed": [
+   [
+    "test/images/v100.jpg",
+    [
+     351.12525,
+     485.230564,
+     390.406534,
+     526.1274199999999
+    ]
+   ],
+   [
+    "test/images/v17.jpg",
+    [
+     838.304502,
+     453.666304,
+     863.041354,
+     480.12619200000006
+    ]
+   ],
+   [
+    "test/images/v37.jpg",
+    [
+     415.690184,
+     356.60352000000006,
+     459.53404,
+     438.046336
+    ]
+   ],
+   [
+    "train/images/1096.jpg",
+    [
+     847.330288,
+     343.084196,
+     892.166408,
+     395.37279600000005
+    ]
+   ],
+   [
+    "train/images/179.jpg",
+    [
+     404.75751399999996,
+     437.7325680000001,
+     423.817142,
+     469.677208
+    ]
+   ],
+   [
+    "train/images/211.jpg",
+    [
+     387.22971,
+     496.234284,
+     407.61060200000003,
+     510.138356
+    ]
+   ]
+  ],
+  "n_fp_total": 403,
+  "n_fn_total": 178
+ },
+ "fold_of": {
+  "train/images/149.jpg": 0,
+  "test/images/v17.jpg": 1,
+  "valid/images/410.jpg": 4,
+  "train/images/651.jpg": 3,
+  "train/images/551.jpg": 1,
+  "train/images/406.jpg": 2,
+  "train/images/532.jpg": 3,
+  "train/images/337.jpg": 3,
+  "train/images/211.jpg": 1,
+  "train/images/476.jpg": 4,
+  "valid/images/520.jpg": 2,
+  "test/images/v37.jpg": 3,
+  "train/images/129.jpg": 2,
+  "train/images/12.jpg": 0,
+  "train/images/267.jpg": 0,
+  "train/images/709.jpg": 1,
+  "train/images/1506.jpg": 0,
+  "train/images/507.jpg": 3,
+  "test/images/v32.jpg": 1,
+  "train/images/1096.jpg": 2,
+  "train/images/1485.jpg": 3,
+  "train/images/433.jpg": 2,
+  "train/images/575.jpg": 0,
+  "train/images/306.jpg": 4,
+  "valid/images/1020.jpg": 0,
+  "train/images/1185.jpg": 3,
+  "train/images/841.jpg": 4,
+  "train/images/179.jpg": 3,
+  "test/images/v100.jpg": 3
+ }
+}

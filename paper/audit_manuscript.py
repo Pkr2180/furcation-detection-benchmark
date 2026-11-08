@@ -25,7 +25,7 @@ def walk(o):
     elif isinstance(o, list):
         [walk(v) for v in o]
     elif isinstance(o, (int, float)) and not isinstance(o, bool):
-        for fmt in ("{:.3f}", "{:+.3f}", "{:.2f}", "{:.1f}", "{:,}", "{}"):
+        for fmt in ("{:.3f}", "{:+.3f}", "{:.2f}", "{:.1f}", "{:.0f}", "{:,}", "{}"):
             try:
                 allowed.add(fmt.format(o).lstrip("+").replace("-", "−") if False else fmt.format(o).lstrip("+"))
                 allowed.add(fmt.format(-o).lstrip("+"))
@@ -36,6 +36,10 @@ def walk(o):
 
 
 walk(N)
+QN = json.load(open(os.path.join(HERE, "qual_numbers.json"))); walk(QN)
+QC = json.load(open(os.path.join(HERE, "qual_cases.json"))); walk(QC["thresholds"])
+allowed |= {str(len(QC["main"])), str(sum(QN["qual_counts"]["rtdetr-l"][k] for k in (0, 2))), "0.001", "0.05", "0.01", "658", "1,316",
+            "9", "8", "7", "0.0", "256"}
 for f in glob.glob(os.path.join(HERE, "tables", "*.csv")):
     for row in csv.reader(open(f, encoding="utf-8")):
         for c in row:

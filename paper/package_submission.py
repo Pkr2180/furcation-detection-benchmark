@@ -1,7 +1,7 @@
 """Collect the submission set into paper/submission/: manuscript, supplement, a stand-alone Tables file, every figure as
 a separate 300-dpi TIFF and PNG, and every table as CSV.   python paper/package_submission.py
 Run after make_figs_tables.py and build_manuscript.py (finalize.ps1 does both)."""
-import csv, glob, os, shutil
+import csv, glob, json, os, shutil
 from docx import Document
 from docx.enum.section import WD_ORIENT
 from docx.shared import Pt, Inches
@@ -14,17 +14,22 @@ for d in ("Figures", "Supplementary_Figures", "Tables_CSV"):
 
 shutil.copy2(os.path.join(HERE, "manuscript", "Furcation_Benchmark_Manuscript.docx"), os.path.join(OUT, "Manuscript.docx"))
 shutil.copy2(os.path.join(HERE, "manuscript", "Furcation_Benchmark_Supplementary.docx"), os.path.join(OUT, "Supplementary_Material.docx"))
-for f in sorted(glob.glob(os.path.join(HERE, "figures", "*.*"))):
-    sub = "Supplementary_Figures" if os.path.basename(f).startswith("FigureS") else "Figures"
-    shutil.copy2(f, os.path.join(OUT, sub, os.path.basename(f)))
-for f in glob.glob(os.path.join(HERE, "tables", "*.csv")):
-    shutil.copy2(f, os.path.join(OUT, "Tables_CSV", os.path.basename(f)))
+FM = json.load(open(os.path.join(HERE, "figure_map.json")))   # written by build_manuscript.py: source -> final number
+for kind, sub in (("main", "Figures"), ("supp", "Supplementary_Figures")):
+    for src, label in FM[kind]:
+        final = label.replace(" ", "")                          # "Figure 4" -> "Figure3", "Figure S1" -> "FigureS5"
+        for ext in ("png", "tif"):
+            shutil.copy2(os.path.join(HERE, "figures", f"{src}.{ext}"), os.path.join(OUT, sub, f"{final}.{ext}"))
+TM = json.load(open(os.path.join(HERE, "table_map.json")))     # source csv -> final table number (citation order)
+for src, label in TM["main_tables"] + TM["supp_tables"]:
+    short = src.split("_", 1)[1]
+    shutil.copy2(os.path.join(HERE, "tables", src + ".csv"), os.path.join(OUT, "Tables_CSV", f"{label.replace(' ', '')}_{short}.csv"))
 
 # stand-alone Tables file (landscape, main tables 1-5) for journals that want tables separately
 CAP = {"Table1_dataset_folds": "Table 1. Development folds and external set.",
        "Table2_main_results": "Table 2. Furcation detection and other findings, pooled out-of-fold over five group-disjoint folds.",
-       "Table3_preregistered_criteria": "Table 3. Pre-registered criteria for claiming a new detector (all four required).",
-       "Table4_paired_comparisons": "Table 4. Paired comparisons of furcation AP@50.",
+       "Table3_preregistered_criteria": "Table 4. Pre-registered criteria for claiming a new detector (all four required).",
+       "Table4_paired_comparisons": "Table 3. Paired comparisons of furcation AP@50.",
        "Table5_minimum_evaluation_standard": "Table 5. Proposed minimum evaluation standard for radiographic furcation detection."}
 doc = Document()
 s = doc.sections[0]; s.orientation = WD_ORIENT.LANDSCAPE
@@ -32,7 +37,7 @@ s.page_width, s.page_height = s.page_height, s.page_width
 for m in ("left_margin", "right_margin", "top_margin", "bottom_margin"):
     setattr(s, m, Inches(0.7))
 doc.styles["Normal"].font.name = "Times New Roman"; doc.styles["Normal"].font.size = Pt(10)
-for k, (name, cap) in enumerate(CAP.items()):
+for k, (name, cap) in enumerate(sorted(CAP.items(), key=lambda x: int(x[1].split()[1].rstrip(".")))):
     if k:
         doc.add_page_break()
     rows = list(csv.reader(open(os.path.join(HERE, "tables", name + ".csv"), encoding="utf-8")))

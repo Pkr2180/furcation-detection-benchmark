@@ -60,6 +60,10 @@ BiFurca-DINO failed all four pre-registered criteria, so the new-architecture cl
 mirror module +0.016 (95% CI −0.019 to +0.050), arch coordinates +0.014 (−0.014 to +0.045), context transformer +0.007 (−0.034 to +0.048);
 no component made a detectable contribution. Full tables are in `paper/tables/`; `paper/tables/Table5_minimum_evaluation_standard.csv` is the proposed ten-item evaluation standard.
 
+## Qualitative figures
+
+`paper/qual_select.py` fixes the example radiographs in advance (seed 0) and writes `paper/qual_cases.json`; `modal_explain.py` computes the out-of-fold furcation score maps and label-free midlines; `paper/make_qual_figs.py` draws ground truth before/after preprocessing (raw YOLO label, rescaled box, binary mask), predictions, score maps and failure cases, and asserts that label files, rescaled boxes, masks and model inputs agree with the evaluation data. `paper/figure_map.json` and `paper/table_map.json` give the final figure and table numbers. Radiographs shown in figures are from YOLO-Dental (Mureșanu, Hedeșiu & Iacob, Zenodo 2025, doi:10.5281/zenodo.15487430), CC BY 4.0.
+
 ## Licence
 
 Code: MIT (see `LICENSE`). Derived data files (folds, predictions, results): CC BY 4.0. The YOLO-Dental dataset keeps its own licence.
