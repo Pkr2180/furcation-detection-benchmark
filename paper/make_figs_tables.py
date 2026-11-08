@@ -27,6 +27,9 @@ NAME = {"rtdetr-l": "RT-DETR-L", "yolo11m": "YOLO11m", "yolov8m": "YOLOv8m", "pl
 ORDER = [v for v in ["rtdetr-l", "yolo11m", "yolov8m", "plain", "full", "no_mirror", "no_coords", "no_context"] if v in RES]
 FAMILY = {v: ("CNN/DETR benchmark" if v in ("rtdetr-l", "yolo11m", "yolov8m") else "Frozen DINOv2") for v in ORDER}
 COL = {"CNN/DETR benchmark": "#2b6cb0", "Frozen DINOv2": "#c05621"}
+# one distinct shade per model, within its family hue (blues = fine-tuned benchmarks, oranges = frozen DINOv2)
+MCOL = {"rtdetr-l": "#08306b", "yolo11m": "#2171b5", "yolov8m": "#6baed6",
+        "plain": "#7f2704", "full": "#d94801", "no_mirror": "#f16913", "no_coords": "#fd8d3c", "no_context": "#fdae6b"}
 CLASSES = ["IMP", "PRR", "OBT", "END", "CAR", "BON", "IMT", "API", "ROT", "FUR", "APS", "ROR", "ORD", "SRD"]
 CLASS_FULL = {"IMP": "Implant", "PRR": "Prosthetic restoration", "OBT": "Obturation", "END": "Endodontic treatment",
               "CAR": "Caries", "BON": "Bone loss", "IMT": "Impacted tooth", "API": "Apical periodontitis",
@@ -110,7 +113,7 @@ box(5.4, 5.6, 4.4, 1.8, f"External clinic set (held out)\n{N['ext_images']} imag
 arrow(2.4, 8.1, 2.4, 7.4); arrow(7.6, 8.1, 7.6, 7.4)
 box(0.2, 2.9, 4.4, 2.0, "Each fold: train / 12% calibration groups / test\n\nBenchmarks: YOLOv8m, YOLO11m, RT-DETR-L\n(COCO-pretrained, 60 epochs, 1280 px)\n"
     "Frozen DINOv2-base + FCOS: plain, BiFurca\n(full, − mirror, − coords, − context; 20 epochs)")
-box(5.4, 2.9, 4.4, 2.0, "Pre-registered protocol (fixed before results)\nfinal-epoch weights, no checkpoint selection\n"
+box(5.4, 2.9, 4.4, 2.0, "Pre-specified protocol (dated file, before any\nBiFurca result)\nfinal-epoch weights, no checkpoint selection\n"
     "primary: pooled out-of-fold furcation AP@50\n2,000× group bootstrap, paired comparisons\nconformal lesion-recall threshold", fc="#fefcbf")
 arrow(2.4, 5.6, 2.4, 4.9); arrow(4.6, 3.9, 5.4, 3.9)
 box(2.6, 0.3, 4.8, 1.8, "Outputs\nfurcation AP@50 (95% CI), AP@50:95, recall at 0.1/0.25/0.5 FP per image,\n"
@@ -130,7 +133,7 @@ a.legend(frameon=False, fontsize=7)
 a = axs[1]
 for k, v in enumerate(ORDER):
     y = N[v]["folds"]
-    a.scatter(np.full(5, k) + np.linspace(-0.15, 0.15, 5), y, s=14, color=COL[FAMILY[v]], alpha=0.8)
+    a.scatter(np.full(5, k) + np.linspace(-0.15, 0.15, 5), y, s=14, color=MCOL[v], alpha=0.8)
     a.plot([k - 0.25, k + 0.25], [N[v]["fur"]] * 2, color="k", lw=1.4)
 a.set_xticks(range(len(ORDER))); a.set_xticklabels([NAME[v] for v in ORDER], rotation=40, ha="right", fontsize=7)
 a.set_ylabel("Furcation AP@50"); a.set_ylim(0, 0.45)
@@ -140,7 +143,7 @@ save(fig, "Figure2_single_split_vs_grouped_cv")
 # ---------------------------------------------------------------- Figure 3: primary endpoint forest
 fig, ax = plt.subplots(figsize=(6.4, 0.42 * len(ORDER) + 1.0))
 for k, v in enumerate(ORDER[::-1]):
-    c = COL[FAMILY[v]]
+    c = MCOL[v]
     ax.errorbar(N[v]["fur"], k, xerr=[[N[v]["fur"] - N[v]["lo"]], [N[v]["hi"] - N[v]["fur"]]], fmt="o", color=c, capsize=3)
     ax.scatter(N[v]["ext"], k - 0.22, marker="D", s=18, facecolor="white", edgecolor=c)
     ax.text(0.47, k, f"{N[v]['fur']:.3f} ({N[v]['lo']:.3f}–{N[v]['hi']:.3f})", va="center", fontsize=7.3)
@@ -156,7 +159,7 @@ fig, ax = plt.subplots(figsize=(4.6, 3.8))
 sty = {"rtdetr-l": "-", "yolo11m": "--", "yolov8m": ":", "plain": "-", "full": "--", "no_mirror": ":", "no_coords": "-.", "no_context": (0, (5, 1, 1, 1, 1, 1))}
 for v in ORDER:
     pr = EX["variants"][v]["pr_fur"]
-    ax.plot(pr["recall"], pr["precision"], linestyle=sty[v], color=COL[FAMILY[v]], lw=1.3, label=f"{NAME[v]} ({N[v]['fur']:.3f})")
+    ax.plot(pr["recall"], pr["precision"], linestyle=sty[v], color=MCOL[v], lw=1.3, label=f"{NAME[v]} ({N[v]['fur']:.3f})")
 ax.set_xlabel("Recall (furcation lesions)"); ax.set_ylabel("Precision"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
 ax.legend(frameon=False, fontsize=6.5)
 save(fig, "Figure4_furcation_PR_curves")
@@ -188,12 +191,14 @@ fig, axs = plt.subplots(1, 2, figsize=(7.2, 3.0))
 sv = [v for v in ORDER if v in SENS]
 x = np.arange(3); w = 0.8 / len(sv)
 for k, v in enumerate(sv):
-    axs[0].bar(x + k * w, [SENS[v][f"fur_ap_iou{t}"][0] for t in (0.3, 0.5, 0.75)], w, color=COL[FAMILY[v]], alpha=0.35 + 0.65 * (k % 3) / 2, label=NAME[v])
-    axs[1].bar(x + k * w, [SENS[v][f"fur_ap50_{s}_lesions"] for s in ("small", "medium", "large")], w, color=COL[FAMILY[v]], alpha=0.35 + 0.65 * (k % 3) / 2)
+    axs[0].bar(x + k * w, [SENS[v][f"fur_ap_iou{t}"][0] for t in (0.3, 0.5, 0.75)], w, color=MCOL[v], label=NAME[v])
+    axs[1].bar(x + k * w, [SENS[v][f"fur_ap50_{s}_lesions"] for s in ("small", "medium", "large")], w, color=MCOL[v])
 axs[0].set_xticks(x + 0.4 - w / 2); axs[0].set_xticklabels(["IoU 0.3", "IoU 0.5", "IoU 0.75"]); axs[0].set_ylabel("Furcation AP")
 axs[1].set_xticks(x + 0.4 - w / 2); axs[1].set_xticklabels(["small", "medium", "large"]); axs[1].set_ylabel("Furcation AP@50")
 axs[0].set_title("A  Matching IoU threshold", loc="left", fontsize=8.5); axs[1].set_title("B  Lesion size tertile", loc="left", fontsize=8.5)
-axs[0].legend(frameon=False, fontsize=6)
+fig.legend(*axs[0].get_legend_handles_labels(), loc="lower center", ncol=4, frameon=False, fontsize=6.5,
+           bbox_to_anchor=(0.5, -0.12))
+fig.subplots_adjust(wspace=0.3)
 save(fig, "FigureS2_sensitivity")
 
 fig, ax = plt.subplots(figsize=(5.2, 3.4))
@@ -202,14 +207,14 @@ for v in ORDER:
     if not logs or not logs[0]["log"]:
         continue
     L = np.array([[e["loss"] for e in l["log"]] for l in logs])
-    ax.plot(range(1, L.shape[1] + 1), L.mean(0), linestyle=sty[v], color=COL[FAMILY[v]], label=NAME[v])
+    ax.plot(range(1, L.shape[1] + 1), L.mean(0), linestyle=sty[v], color=MCOL[v], label=NAME[v])
 ax.set_xlabel("Epoch"); ax.set_ylabel("Training loss (mean of 5 folds)"); ax.legend(frameon=False, fontsize=7)
 save(fig, "FigureS3_DINO_training_loss")
 
 fig, ax = plt.subplots(figsize=(5.2, 3.4))
 fp = [0.1, 0.25, 0.5]
 for v in ORDER:
-    ax.plot(fp, [N[v]["r01"], N[v]["r025"], N[v]["r05"]], marker="o", linestyle=sty[v], color=COL[FAMILY[v]], label=NAME[v])
+    ax.plot(fp, [N[v]["r01"], N[v]["r025"], N[v]["r05"]], marker="o", linestyle=sty[v], color=MCOL[v], label=NAME[v])
 ax.set_xlabel("False-positive furcation boxes per image"); ax.set_ylabel("Furcation lesion recall"); ax.set_ylim(0, 1)
 ax.legend(frameon=False, fontsize=6.5)
 save(fig, "FigureS4_recall_at_FPPI")
@@ -235,7 +240,7 @@ crit = [
      "Yes" if (pb["ext_diff"] > 0 and pb["folds_a_better"] >= 4) else "No"],
     ["4. Other-class mAP@50 within 0.02 of best benchmark", f"{N['full']['other']:.3f} vs {N[bb]['other']:.3f} ({N['full']['other'] - N[bb]['other']:+.3f})",
      "Yes" if N["full"]["other"] - N[bb]["other"] >= -0.02 else "No"]]
-write_csv("Table3_preregistered_criteria", ["Pre-registered criterion", "Observed", "Met"], crit)
+write_csv("Table3_preregistered_criteria", ["Pre-specified criterion", "Observed", "Met"], crit)
 N["criteria"] = crit
 
 write_csv("Table4_paired_comparisons", ["Comparison (A − B)", "Difference in furcation AP@50", "95% CI", "P(A > B)", "Folds A better", "External difference"],
@@ -256,9 +261,13 @@ cr = []
 for v in ORDER:
     for al in ("0.1", "0.2"):
         c = N[v]["conf"][al]
+        c5 = EX["variants"][v]["conformal_iou05"][al]
         cr.append([NAME[v], f"{c['target_recall']:.1f}", f"{c['folds_feasible']}/5", f3(c["achieved_recall"]) if c["folds_feasible"] else "infeasible",
-                   f3(c["fp_per_image"]) if c["folds_feasible"] else "—", f3(c["mean_tau"]) if c["mean_tau"] is not None else "—"])
-write_csv("TableS4_conformal", ["Model", "Target lesion recall", "Folds feasible", "Achieved recall (test)", "False-positive boxes per image", "Mean threshold"], cr)
+                   f3(c["fp_per_image"]) if c["folds_feasible"] else "—", f3(c["mean_tau"]) if c["mean_tau"] is not None else "—",
+                   f"{c5['folds_feasible']}/5"])
+write_csv("TableS4_conformal", ["Model", "Target lesion recall", "Folds feasible (IoU 0.3)", "Achieved recall (test, IoU 0.3)",
+                                "False-positive boxes per image", "Mean threshold", "Folds feasible (IoU 0.5; sensitivity)"], cr)
+N["conf05_feasible"] = {al: sum(EX["variants"][v]["conformal_iou05"][al]["folds_feasible"] for v in ORDER) for al in ("0.1", "0.2")}
 write_csv("TableS5_old_single_split_checkpoints", ["Epoch", "Validation furcation AP@50 (FastViT-SA24 + FCOS, earlier study)"],
           [[e, f"{x:.3f}"] for e, x in zip(N["old_ckpt_epochs"], N["old_ckpt_fur"])])
 write_csv("TableS6_training_configuration", ["Model", "Pretraining", "Trainable parts", "Input size", "Epochs", "Optimiser / schedule", "Weights evaluated"],

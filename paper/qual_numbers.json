@@ -1,4 +1,16 @@
 {
+ "map_stats": {
+  "n_images": 20,
+  "pearson_full_plain_median": 0.765130195989686,
+  "pearson_min": 0.1487717558519338,
+  "pearson_max": 0.8699149164778885,
+  "mass_in_box_full_median": 0.0762967620906094,
+  "mass_in_box_plain_median": 0.049967582003854,
+  "box_area_share_median": 0.001124682688132536,
+  "n_with_fur": 10,
+  "peak_vs_saved_max_absdiff": 0.010506272315979004,
+  "n_peak_checked": 28
+ },
  "gt": {
   "n": 309,
   "med_w": 33.32638400000002,

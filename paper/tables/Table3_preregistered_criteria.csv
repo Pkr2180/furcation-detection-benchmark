@@ -1,4 +1,4 @@
-Pre-registered criterion,Observed,Met
+Pre-specified criterion,Observed,Met
 "1. BiFurca beats plain DINOv2, P(diff>0) ≥ 0.95",diff +0.000 (-0.032 to +0.032); P = 0.48,No
 "2. BiFurca beats best benchmark (RT-DETR-L), P ≥ 0.95",diff -0.120 (-0.179 to -0.068); P = 0.00,No
 3. Direction holds externally and in ≥ 4/5 folds,external diff vs RT-DETR-L -0.001; better in 0/5 folds,No

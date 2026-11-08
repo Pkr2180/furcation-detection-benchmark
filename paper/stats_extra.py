@@ -56,14 +56,35 @@ def pr_curve(cache, ids):
     return dict(recall=rec[keep].round(4).tolist(), precision=prec[keep].round(4).tolist())
 
 
+def conformal(files, gt, iou):
+    """Pre-specified sensitivity analysis: split-conformal lesion-recall threshold with lesion matching at `iou`
+    (the primary analysis in analyze.py uses 0.3). Same per-fold calibration logic as analyze.py."""
+    out = {}
+    runs = [json.load(open(f)) for f in sorted(files)]
+    for alpha in (0.1, 0.2):
+        hit = n = fp = imgs = 0; infeasible = 0
+        for r in runs:
+            cal_g = {i: gt[i] for i in r["cal_groups"]}
+            tau = E.conformal_threshold(E.lesion_scores(to_np(r["cal"]), cal_g, FUR, thr=iou), alpha)
+            if tau is None:
+                infeasible += 1
+                continue
+            tg = {i: gt[i] for i in r["test_groups"]}
+            a = E.apply_threshold(to_np(r["test"]), tg, FUR, tau, thr=iou)
+            hit += a["recall"] * a["n_lesions"]; n += a["n_lesions"]; fp += a["fp_per_image"] * len(tg); imgs += len(tg)
+        out[str(alpha)] = dict(target_recall=1 - alpha, folds_feasible=len(runs) - infeasible,
+                               achieved_recall=hit / n if n else None, fp_per_image=fp / imgs if imgs else None)
+    return out
+
+
 def main(rd, man, outp):
     gt = load_gt(man)
-    V = {}
+    V, FILES = {}, {}
     for d in sorted(glob.glob(os.path.join(rd, "*"))):
         v = os.path.basename(d)
         fs = glob.glob(os.path.join(d, "fold*_seed0.json"))
         if len(fs) == 5 and not v.endswith("overfit"):
-            V[v] = pool(fs)
+            V[v] = pool(fs); FILES[v] = fs
     print("variants:", list(V))
     ids = sorted(set.intersection(*[set(V[v][1]) for v in V]))
     groups = V[next(iter(V))][1]
@@ -85,8 +106,11 @@ def main(rd, man, outp):
                           fur_ap50_mean=float(np.mean(ef)), fur_ap50_min=float(np.min(ef)), fur_ap50_max=float(np.max(ef)),
                           per_class_ap50_mean={c: (None if all(np.isnan(f[c]) for f in efc) else float(np.nanmean([f[c] for f in efc])))
                                                for c in CLASSES}),
-            train_logs=logs)
-        print(v, "FUR AP50 (cache check)", round(out["variants"][v]["fur_ap50_check"], 4))
+            train_logs=logs,
+            conformal_iou05=conformal(FILES[v], gt, 0.5))
+        print(v, "FUR AP50 (cache check)", round(out["variants"][v]["fur_ap50_check"], 4),
+              "| conformal IoU0.5 feasible folds (90%, 80%):", out["variants"][v]["conformal_iou05"]["0.1"]["folds_feasible"],
+              out["variants"][v]["conformal_iou05"]["0.2"]["folds_feasible"])
 
     best_bench = max([b for b in ("rtdetr-l", "yolo11m", "yolov8m") if b in V],
                      key=lambda b: out["variants"][b]["fur_ap50_check"], default=None)

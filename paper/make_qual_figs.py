@@ -419,8 +419,42 @@ def fig_midline():
     return dict(min=min(pos), max=max(pos))
 
 
+def map_stats():
+    """Quantify the score maps instead of describing them by eye (all images with saved maps):
+    Pearson r between BiFurca and plain maps; share of score mass (score >= 0.05) inside annotated furcation boxes,
+    and the area share of those boxes for reference; peak vs top saved furcation score where that box was retained."""
+    names = sorted(os.listdir(os.path.join(QI, "explain", "full")))
+    r_list, inside, area, peak = [], {"full": [], "plain": []}, [], {"full": [], "plain": []}
+    for nm in names:
+        p = nm[:-4].replace("__", "/")
+        p = next(q for q in list(GT) if q.rsplit(".", 1)[0] == p)
+        hf = heat("full", p)["heat"].astype(np.float64); hp = heat("plain", p)["heat"].astype(np.float64)
+        r_list.append(float(np.corrcoef(hf.ravel(), hp.ravel())[0, 1]))
+        gb = GT[p]["boxes"][GT[p]["labels"] == FUR]
+        m = np.zeros((H, W), bool)
+        for b in gb:
+            m[int(round(b[1])):int(round(b[3])), int(round(b[0])):int(round(b[2]))] = True
+        if m.any():
+            area.append(float(m.mean()))
+            for v, h in (("full", hf), ("plain", hp)):
+                hm = np.where(h >= 0.05, h, 0)
+                inside[v].append(float(hm[m].sum() / max(hm.sum(), 1e-9)))
+        for v, h in (("full", hf), ("plain", hp)):
+            ext = p.startswith("test_alte")
+            pr = preds(v, p, external=ext, fold=int(heat(v, p)["fold"]))
+            s = pr["scores"][pr["labels"] == FUR]
+            if len(s):
+                peak[v].append(abs(float(h.max()) - float(s.max())))
+    return dict(n_images=len(names), pearson_full_plain_median=float(np.median(r_list)), pearson_min=float(min(r_list)),
+                pearson_max=float(max(r_list)), mass_in_box_full_median=float(np.median(inside["full"])),
+                mass_in_box_plain_median=float(np.median(inside["plain"])), box_area_share_median=float(np.median(area)),
+                n_with_fur=len(area), peak_vs_saved_max_absdiff=float(max(peak["full"] + peak["plain"])),
+                n_peak_checked=len(peak["full"]) + len(peak["plain"]))
+
+
 if __name__ == "__main__":
     out = {}
+    out["map_stats"] = map_stats()
     fig_architecture()
     out["gt"] = fig_ground_truth()
     out["qual_counts"] = fig_predictions()

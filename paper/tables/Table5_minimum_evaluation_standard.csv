@@ -7,5 +7,5 @@ Item,Requirement,How this study met it
 6. Untouched external set,Score an external set that played no part in any decision.,"180 clinic images, 0 duplicates of the pool"
 7. Strong fine-tuned baselines,"Compare with current fine-tuned CNN and transformer detectors, not only older ones.","YOLOv8m, YOLO11m, RT-DETR-L"
 8. Paired comparisons,Compare models on the same resamples and report the difference with its interval.,"Paired group bootstrap, P(A>B), folds won, external difference"
-9. Pre-registered rules and ablations,Fix in advance what counts as an improvement; ablate every new component.,Four criteria fixed before results; three single-module ablations
+9. Pre-specified rules and ablations,"Fix in advance, ideally in a public registry, what counts as an improvement; ablate every new component.",Four criteria fixed in a dated file before any BiFurca result (not publicly registered); three single-module ablations
 "10. Open splits, predictions and code; report negatives","Release fold assignment, per-image predictions and code; publish failed claims.",All released (Data and Code Availability); negative result reported

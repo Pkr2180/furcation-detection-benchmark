@@ -25,7 +25,7 @@ def walk(o):
     elif isinstance(o, list):
         [walk(v) for v in o]
     elif isinstance(o, (int, float)) and not isinstance(o, bool):
-        for fmt in ("{:.3f}", "{:+.3f}", "{:.2f}", "{:.1f}", "{:.0f}", "{:,}", "{}"):
+        for fmt in ("{:.4f}", "{:.3f}", "{:+.3f}", "{:.2f}", "{:.1f}", "{:.0f}", "{:,}", "{}"):
             try:
                 allowed.add(fmt.format(o).lstrip("+").replace("-", "−") if False else fmt.format(o).lstrip("+"))
                 allowed.add(fmt.format(-o).lstrip("+"))
@@ -40,6 +40,10 @@ QN = json.load(open(os.path.join(HERE, "qual_numbers.json"))); walk(QN)
 QC = json.load(open(os.path.join(HERE, "qual_cases.json"))); walk(QC["thresholds"])
 allowed |= {str(len(QC["main"])), str(sum(QN["qual_counts"]["rtdetr-l"][k] for k in (0, 2))), "0.001", "0.05", "0.01", "658", "1,316",
             "9", "8", "7", "0.0", "256"}
+# literature values quoted from verified references (PubMed abstracts): Atieh 2026 pooled sensitivity/specificity,
+# tooth-level accuracy range (Zhang 92%, Mao 94.97%, Vilkomir 96.47%, Kurumlu 97.9%), Valente 2026 furcation AP@50,
+# Karamuftuoglu 2025 mAP@50; protocol date
+allowed |= {"0.93", "0.94", "92", "98", "0.577", "0.434", "2026", "5"}
 for f in glob.glob(os.path.join(HERE, "tables", "*.csv")):
     for row in csv.reader(open(f, encoding="utf-8")):
         for c in row:
@@ -47,6 +51,9 @@ for f in glob.glob(os.path.join(HERE, "tables", "*.csv")):
 # derived values used in text
 S = N["sens"]; bb = N["best_benchmark"]
 allowed.add(str(N["n_pool"] - S[bb]["fur_ap50_excluding_dup_images"]["n_images"]))
+MSt = QN["map_stats"]; allowed.add(f"{MSt['mass_in_box_full_median'] / MSt['box_area_share_median']:.0f}")
+leak = N[bb]["fur"] - S[bb]["fur_ap50_excluding_dup_images"]["ap"]
+allowed |= {f"{-leak:+.3f}".lstrip("+"), f"{N['old_selected'] - N['old_final']:.3f}"}
 allowed.add(f"{max(N[bb]['folds']) - min(N[bb]['folds']):.3f}")
 allowed.add(f"{N[bb]['fur'] / N['old_selected']:.0%}".rstrip("%"))
 allowed.add(f"{N[bb]['fur'] - min(N[b]['fur'] for b in ('rtdetr-l', 'yolo11m', 'yolov8m')):.3f}")

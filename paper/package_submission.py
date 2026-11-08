@@ -28,7 +28,7 @@ for src, label in TM["main_tables"] + TM["supp_tables"]:
 # stand-alone Tables file (landscape, main tables 1-5) for journals that want tables separately
 CAP = {"Table1_dataset_folds": "Table 1. Development folds and external set.",
        "Table2_main_results": "Table 2. Furcation detection and other findings, pooled out-of-fold over five group-disjoint folds.",
-       "Table3_preregistered_criteria": "Table 4. Pre-registered criteria for claiming a new detector (all four required).",
+       "Table3_preregistered_criteria": "Table 4. Pre-specified criteria for claiming a new detector (all four required).",
        "Table4_paired_comparisons": "Table 3. Paired comparisons of furcation AP@50.",
        "Table5_minimum_evaluation_standard": "Table 5. Proposed minimum evaluation standard for radiographic furcation detection."}
 doc = Document()

@@ -794,7 +794,21 @@
       }
      ]
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "no_context": {
    "fur_ap50_check": 0.0935353200394996,
@@ -1589,7 +1603,21 @@
       }
      ]
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "no_coords": {
    "fur_ap50_check": 0.08584091272377145,
@@ -2360,7 +2388,21 @@
       }
      ]
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "no_mirror": {
    "fur_ap50_check": 0.08367844989768436,
@@ -3147,7 +3189,21 @@
       }
      ]
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "plain": {
    "fur_ap50_check": 0.10007223301992943,
@@ -3978,7 +4034,21 @@
       }
      ]
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "rtdetr-l": {
    "fur_ap50_check": 0.21992012374303158,
@@ -4408,7 +4478,21 @@
      "fold": 4,
      "log": []
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "yolo11m": {
    "fur_ap50_check": 0.2069203186680925,
@@ -4828,7 +4912,21 @@
      "fold": 4,
      "log": []
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   },
   "yolov8m": {
    "fur_ap50_check": 0.16026711161938031,
@@ -5210,7 +5308,21 @@
      "fold": 4,
      "log": []
     }
-   ]
+   ],
+   "conformal_iou05": {
+    "0.1": {
+     "target_recall": 0.9,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    },
+    "0.2": {
+     "target_recall": 0.8,
+     "folds_feasible": 0,
+     "achieved_recall": null,
+     "fp_per_image": null
+    }
+   }
   }
  },
  "paired": {
